@@ -16,14 +16,16 @@ https://github.com/ropensci/osmdata#readme
 ## What This Fork Changes
 
 This fork carries Mobility packaging and integration changes for workflows that
-reuse downloaded OpenStreetMap data across model runs.
+read downloaded OpenStreetMap XML files repeatedly.
 
 The current changes are:
 
 - The package is renamed to `osmdata.mobility`.
 - The fork is published from `mobility-team/osmdata.mobility`.
-- File-based Overpass XML input is validated, then kept as raw XML text so
-  downstream Mobility code can reuse the exact downloaded OSM XML payload.
+- File-based Overpass XML input follows the performance change from
+  [`ropensci/osmdata#248`](https://github.com/ropensci/osmdata/pull/248):
+  `fill_overpass_data()` reads the XML file directly with `readChar()` instead
+  of parsing it and converting it back to text.
 - The package is listed in the Mobility R-universe registry.
 
 ## Installation
@@ -57,8 +59,8 @@ roads <- osmdata_sf(q)
 
 ## Reusing Saved OSM XML
 
-For Mobility workflows, download OSM XML once and reuse the saved file in later
-steps:
+For Mobility workflows, download OSM XML once and read the saved file directly
+in later steps:
 
 ```r
 q <- opq("Geneva, Switzerland") |>
@@ -72,7 +74,7 @@ roads <- osmdata_sf(doc = "geneva-roads.osm")
 ## Versioning
 
 This fork currently publishes `osmdata.mobility` version `0.2.5.005`, based on
-upstream osmdata plus the Mobility XML reuse change.
+upstream osmdata plus the file-based XML read performance change.
 
 ## License
 
