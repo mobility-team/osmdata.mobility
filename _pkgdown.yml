@@ -1,4 +1,4 @@
-title: osmdata
+title: osmdata.mobility
 
 templates:
   params:
@@ -28,7 +28,7 @@ reference:
     - has_concept("transform")
 
 articles:
-  - title: The osmdata package
+  - title: The osmdata.mobility package
     contents:
     - osmdata
     - osmdata-sc
@@ -36,7 +36,7 @@ articles:
     - query-split
 
 navbar:
-  title: osmdata
+  title: osmdata.mobility
   type: default
   left:
   - text: Home
@@ -47,4 +47,4 @@ navbar:
     href: reference/index.html
   right:
   - icon: fa-github fa-lg
-    href: https://github.com/ropensci/osmdata
+    href: https://github.com/mobility-team/osmdata.mobility

@@ -24,7 +24,7 @@ knitr::opts_chunk$set (
 ```
 
 
-# osmdata <a href='https://docs.ropensci.org/osmdata/'><img src='man/figures/logo.png' align="right" height=210 width=182/></a>
+# osmdata.mobility <a href='https://github.com/mobility-team/osmdata.mobility'><img src='man/figures/logo.png' align="right" height=210 width=182/></a>
 
 
 
@@ -43,6 +43,26 @@ status](https://github.com/ropensci/osmdata/workflows/R-CMD-check/badge.svg)](ht
 [![status](https://joss.theoj.org/papers/10.21105/joss.00305/status.svg)](https://joss.theoj.org/papers/10.21105/joss.00305)
 
 <!-- badges: end -->
+
+`osmdata.mobility` is a Mobility-oriented fork of
+[`ropensci/osmdata`](https://github.com/ropensci/osmdata).
+
+The R package name is `osmdata.mobility` to avoid confusion with the upstream
+CRAN package `osmdata`. It keeps the original osmdata API; exported functions
+such as `opq()`, `add_osm_feature()`, `osmdata_sf()`, and `osmdata_xml()` are
+unchanged.
+
+For the full upstream package presentation, examples, and original
+OpenStreetMap/Overpass documentation, see the original osmdata README:
+
+https://github.com/ropensci/osmdata#readme
+
+## What This Fork Changes
+
+This fork carries Mobility packaging and integration changes for internal
+Mobility workflows. The current code change keeps file-based Overpass XML input
+available as raw XML text after validation, which lets downstream Mobility code
+reuse the exact downloaded OSM XML payload.
 
 
 `osmdata` is an R package for accessing the data underlying OpenStreetMap
@@ -63,24 +83,23 @@ reading-in bulk OSM data extracts).
 
 ## Installation
 
-To install latest CRAN version:
+Install the Mobility fork from Mobility R-universe:
 ```{r cran-install, eval=FALSE}
-install.packages ("osmdata")
+install.packages(
+    "osmdata.mobility",
+    repos = c("https://mobility-team.r-universe.dev", "https://cloud.r-project.org")
+)
 ```
-Alternatively, install the development version with any one of the following
-options:
+Alternatively, install the development version directly from GitHub:
 ```{r remotes, eval = FALSE}
 # install.packages("remotes")
-remotes::install_git ("https://git.sr.ht/~mpadge/osmdata")
-remotes::install_bitbucket ("mpadge/osmdata")
-remotes::install_gitlab ("mpadge/osmdata")
-remotes::install_github ("ropensci/osmdata")
+remotes::install_github ("mobility-team/osmdata.mobility")
 ```
 
 To load the package and check the version:
 ```{r, eval=TRUE}
-library (osmdata)
-packageVersion ("osmdata")
+library (osmdata.mobility)
+packageVersion ("osmdata.mobility")
 ```
 
 ## Usage

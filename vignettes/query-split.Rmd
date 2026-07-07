@@ -39,7 +39,7 @@ the data and remove duplicate objects. This section demonstrates how that may
 be done, starting with a large bounding box.
 
 ```{r get-bbox, eval = FALSE}
-library (osmdata)
+library (osmdata.mobility)
 
 bb <- getbb ("Southeastern Connecticut COG", featuretype = "boundary")
 bb

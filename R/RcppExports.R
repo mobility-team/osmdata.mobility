@@ -47,7 +47,7 @@ NULL
 #'
 #' @noRd
 rcpp_osmdata_df <- function(st) {
-    .Call(`_osmdata_rcpp_osmdata_df`, st)
+    .Call(`_osmdata_mobility_rcpp_osmdata_df`, st)
 }
 
 #' rcpp_osmdata_sc
@@ -59,7 +59,7 @@ rcpp_osmdata_df <- function(st) {
 #' 
 #' @noRd 
 rcpp_osmdata_sc <- function(st) {
-    .Call(`_osmdata_rcpp_osmdata_sc`, st)
+    .Call(`_osmdata_mobility_rcpp_osmdata_sc`, st)
 }
 
 #' get_osm_relations
@@ -120,7 +120,7 @@ NULL
 #' 
 #' @noRd 
 rcpp_osmdata_sf <- function(st) {
-    .Call(`_osmdata_rcpp_osmdata_sf`, st)
+    .Call(`_osmdata_mobility_rcpp_osmdata_sf`, st)
 }
 
 #' get_osm_nodes
@@ -181,6 +181,6 @@ NULL
 #'
 #' @noRd
 rcpp_osmdata_sp <- function(st) {
-    .Call(`_osmdata_rcpp_osmdata_sp`, st)
+    .Call(`_osmdata_mobility_rcpp_osmdata_sp`, st)
 }
 

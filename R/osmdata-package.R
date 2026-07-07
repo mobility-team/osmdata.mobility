@@ -47,6 +47,7 @@
 #' }
 #'
 #' @name osmdata
+#' @aliases osmdata.mobility-package
 #' @docType package
 #' @family package
 #' @author Mark Padgham, Bob Rudis, Robin Lovelace, Maëlle Salmon, Joan Maspons
@@ -54,7 +55,7 @@
 #' @importFrom methods is slot
 #' @importFrom Rcpp evalCpp
 #' @importFrom utils browseURL read.table
-#' @useDynLib osmdata, .registration = TRUE
+#' @useDynLib osmdata.mobility, .registration = TRUE
 "_PACKAGE"
 
 #' Pipe operator

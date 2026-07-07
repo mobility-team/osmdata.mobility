@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // rcpp_osmdata_df
 Rcpp::List rcpp_osmdata_df(const std::string& st);
-RcppExport SEXP _osmdata_rcpp_osmdata_df(SEXP stSEXP) {
+RcppExport SEXP _osmdata_mobility_rcpp_osmdata_df(SEXP stSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -23,7 +23,7 @@ END_RCPP
 }
 // rcpp_osmdata_sc
 Rcpp::List rcpp_osmdata_sc(const std::string& st);
-RcppExport SEXP _osmdata_rcpp_osmdata_sc(SEXP stSEXP) {
+RcppExport SEXP _osmdata_mobility_rcpp_osmdata_sc(SEXP stSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,7 +34,7 @@ END_RCPP
 }
 // rcpp_osmdata_sf
 Rcpp::List rcpp_osmdata_sf(const std::string& st);
-RcppExport SEXP _osmdata_rcpp_osmdata_sf(SEXP stSEXP) {
+RcppExport SEXP _osmdata_mobility_rcpp_osmdata_sf(SEXP stSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,7 +45,7 @@ END_RCPP
 }
 // rcpp_osmdata_sp
 Rcpp::List rcpp_osmdata_sp(const std::string& st);
-RcppExport SEXP _osmdata_rcpp_osmdata_sp(SEXP stSEXP) {
+RcppExport SEXP _osmdata_mobility_rcpp_osmdata_sp(SEXP stSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -53,4 +53,17 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(rcpp_osmdata_sp(st));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_osmdata_mobility_rcpp_osmdata_df", (DL_FUNC) &_osmdata_mobility_rcpp_osmdata_df, 1},
+    {"_osmdata_mobility_rcpp_osmdata_sc", (DL_FUNC) &_osmdata_mobility_rcpp_osmdata_sc, 1},
+    {"_osmdata_mobility_rcpp_osmdata_sf", (DL_FUNC) &_osmdata_mobility_rcpp_osmdata_sf, 1},
+    {"_osmdata_mobility_rcpp_osmdata_sp", (DL_FUNC) &_osmdata_mobility_rcpp_osmdata_sp, 1},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_osmdata_mobility(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
