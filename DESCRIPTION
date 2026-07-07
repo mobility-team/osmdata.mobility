@@ -2,7 +2,7 @@ Package: osmdata.mobility
 Title: Import 'OpenStreetMap' Data as Simple Features or Spatial Objects
 Version: 0.2.5.005
 Authors@R: c(
-    person("Mark", "Padgham", , "mark.padgham@email.com", role = c("aut", "cre")),
+    person("Mark", "Padgham", , "mark.padgham@email.com", role = "aut"),
     person("Bob", "Rudis", role = "aut"),
     person("Robin", "Lovelace", role = "aut"),
     person("Maëlle", "Salmon", role = "aut"),
@@ -17,9 +17,10 @@ Authors@R: c(
     person("Marcin", "Kalicinski", role = c("ctb", "cph"),
            comment = "Author of included RapidXML code"),
     person("Eli", "Pousson", , "eli.pousson@gmail.com", role = c("ctb"),
-           comment = c(ORCID = "0000-0001-8280-1706"))
+           comment = c(ORCID = "0000-0001-8280-1706")),
+    person("Félix", "Pouchain", , "flx.pouchain@gmail.com", role = c("cre", "ctb"))
   )
-Maintainer: Mark Padgham <mark.padgham@email.com>
+Maintainer: Félix Pouchain <flx.pouchain@gmail.com>
 Description: Download and import of 'OpenStreetMap' ('OSM') data as 'sf'
     or 'sp' objects.  'OSM' data are extracted from the 'Overpass' web
     server (<https://overpass-api.de/>) and processed with very fast 'C++'
