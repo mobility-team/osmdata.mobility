@@ -1,4 +1,4 @@
 library(testthat)
-library(osmdata)
+library(osmdata.mobility)
 
-test_check("osmdata")
+test_check("osmdata.mobility")

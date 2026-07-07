@@ -1,5 +1,5 @@
 ---
-title: "1. osmdata"
+title: "1. osmdata.mobility"
 author: 
   - "Mark Padgham"
   - "Robin Lovelace"
@@ -12,7 +12,7 @@ output:
         number_sections: false
         theme: flatly
 vignette: >
-  %\VignetteIndexEntry{1. osmdata}
+  %\VignetteIndexEntry{1. osmdata.mobility}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -34,19 +34,22 @@ Unlike the [`OpenStreetMap`](https://cran.r-project.org/package=OpenStreetMap)
 package, which facilitates the download of raster tiles, `osmdata` provides
 access to the vector data underlying OSM.
 
-`osmdata` can be installed from CRAN with
+`osmdata.mobility` can be installed from Mobility R-universe with
 ```{r, eval = FALSE}
-install.packages("osmdata")
+install.packages(
+    "osmdata.mobility",
+    repos = c("https://mobility-team.r-universe.dev", "https://cloud.r-project.org")
+)
 ```
 and then loaded in the usual way:
 ```{r}
-library(osmdata)
+library(osmdata.mobility)
 ```
-The development version of `osmdata` can be installed with the `remotes`
+The development version of `osmdata.mobility` can be installed with the `remotes`
 package using the following command:
 
 ```{r install, eval = FALSE}
-remotes::install_github('ropensci/osmdata')
+remotes::install_github('mobility-team/osmdata.mobility')
 ```
 
 `osmdata` uses the [`overpass` API](https://overpass-api.de) to download

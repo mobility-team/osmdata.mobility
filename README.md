@@ -1,6 +1,6 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# osmdata <a href='https://docs.ropensci.org/osmdata/'><img src='man/figures/logo.png' align="right" height=210 width=182/></a>
+# osmdata.mobility <a href='https://github.com/mobility-team/osmdata.mobility'><img src='man/figures/logo.png' align="right" height=210 width=182/></a>
 
 <!-- badges: start -->
 
@@ -20,6 +20,26 @@ Downloads](https://cranlogs.r-pkg.org/badges/grand-total/osmdata?color=orange)](
 
 <!-- badges: end -->
 
+`osmdata.mobility` is a Mobility-oriented fork of
+[`ropensci/osmdata`](https://github.com/ropensci/osmdata).
+
+The R package name is `osmdata.mobility` to avoid confusion with the
+upstream CRAN package `osmdata`. It keeps the original osmdata API;
+exported functions such as `opq()`, `add_osm_feature()`,
+`osmdata_sf()`, and `osmdata_xml()` are unchanged.
+
+For the full upstream package presentation, examples, and original
+OpenStreetMap/Overpass documentation, see the original osmdata README:
+
+https://github.com/ropensci/osmdata#readme
+
+## What This Fork Changes
+
+This fork carries Mobility packaging and integration changes for internal
+Mobility workflows. The current code change keeps file-based Overpass XML
+input available as raw XML text after validation, which lets downstream
+Mobility code reuse the exact downloaded OSM XML payload.
+
 `osmdata` is an R package for accessing the data underlying
 OpenStreetMap (OSM), delivered via the [Overpass
 API](https://wiki.openstreetmap.org/wiki/Overpass_API). (Other packages
@@ -38,30 +58,29 @@ for reading-in bulk OSM data extracts).
 
 ## Installation
 
-To install latest CRAN version:
+Install the Mobility fork from Mobility R-universe:
 
 ``` r
-install.packages ("osmdata")
+install.packages(
+    "osmdata.mobility",
+    repos = c("https://mobility-team.r-universe.dev", "https://cloud.r-project.org")
+)
 ```
 
-Alternatively, install the development version with any one of the
-following options:
+Alternatively, install the development version directly from GitHub:
 
 ``` r
 # install.packages("remotes")
-remotes::install_git ("https://git.sr.ht/~mpadge/osmdata")
-remotes::install_bitbucket ("mpadge/osmdata")
-remotes::install_gitlab ("mpadge/osmdata")
-remotes::install_github ("ropensci/osmdata")
+remotes::install_github ("mobility-team/osmdata.mobility")
 ```
 
 To load the package and check the version:
 
 ``` r
-library (osmdata)
+library (osmdata.mobility)
 #> Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
-packageVersion ("osmdata")
-#> [1] '0.2.2'
+packageVersion ("osmdata.mobility")
+#> [1] '0.2.5.005'
 ```
 
 ## Usage

@@ -4,6 +4,7 @@
 \name{osmdata}
 \alias{osmdata}
 \alias{osmdata-package}
+\alias{osmdata.mobility-package}
 \title{osmdata class def}
 \usage{
 osmdata(
@@ -103,8 +104,8 @@ format
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://docs.ropensci.org/osmdata/ (website) https://github.com/ropensci/osmdata/ (devel)}
-  \item Report bugs at \url{https://github.com/ropensci/osmdata/issues}
+  \item \url{https://github.com/mobility-team/osmdata.mobility/ (fork) https://github.com/ropensci/osmdata/ (upstream) https://docs.ropensci.org/osmdata/ (upstream website)}
+  \item Report bugs at \url{https://github.com/mobility-team/osmdata.mobility/issues}
 }
 
 }

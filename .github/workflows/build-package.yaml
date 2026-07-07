@@ -102,7 +102,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       with:
         tag_name: ${{ github.event.inputs.tag_name }}
-        release_name: osmdata_${{ env.PACKAGE_VERSION }}
+        release_name: osmdata.mobility_${{ env.PACKAGE_VERSION }}
         draft: false
         prerelease: false
 
@@ -113,7 +113,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: binaries/ubuntu/*.tar.gz
-        asset_name: osmdata_${{ env.PACKAGE_VERSION }}_ubuntu.tar.gz
+        asset_name: osmdata.mobility_${{ env.PACKAGE_VERSION }}_ubuntu.tar.gz
         asset_content_type: application/gzip
 
     - name: Upload Release Asset (Windows)
@@ -123,7 +123,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: binaries/windows/*.zip
-        asset_name: osmdata_${{ env.PACKAGE_VERSION }}_windows.zip
+        asset_name: osmdata.mobility_${{ env.PACKAGE_VERSION }}_windows.zip
         asset_content_type: application/zip
 
     - name: Upload Release Asset (macOS)
@@ -133,5 +133,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: binaries/macos/*.tar.gz
-        asset_name: osmdata_${{ env.PACKAGE_VERSION }}_macos.tar.gz
+        asset_name: osmdata.mobility_${{ env.PACKAGE_VERSION }}_macos.tar.gz
         asset_content_type: application/gzip
