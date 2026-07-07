@@ -173,7 +173,6 @@ fill_overpass_data <- function (obj, doc, quiet = TRUE, encoding = "UTF-8") {
             doc <- readChar (doc, file.info (doc)$size, useBytes = TRUE)
         } else {
             obj <- get_metadata (obj, doc)
-            doc <- as.character (doc)
         }
     }
 
