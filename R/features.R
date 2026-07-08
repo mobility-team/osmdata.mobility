@@ -25,12 +25,9 @@ available_features <- function () {
         keys <- xml2::xml_attr (
             rvest::html_elements (pg, "a[href^='/wiki/Key']"), # nolint
             "href"
-        ) %>%
-            strsplit ("/wiki/Key:") %>%
-            unlist ()
-        keys [keys != ""] %>%
-            sort () %>%
-            unique ()
+        )
+        keys <- unlist (strsplit (keys, "/wiki/Key:"))
+        unique (sort (keys [keys != ""]))
     } else {
         message ("No internet connection")
     }
@@ -115,8 +112,8 @@ get_all_tags <- function (pg) {
 #' @noRd
 tags_from_taglists <- function (pg) {
 
-    taglists <- rvest::html_elements (pg, "div[class='taglist']") %>%
-        rvest::html_attr ("data-taginfo-taglist-tags")
+    taglists <- rvest::html_elements (pg, "div[class='taglist']")
+    taglists <- rvest::html_attr (taglists, "data-taginfo-taglist-tags")
 
     taglists <- lapply (taglists, function (i) {
 
@@ -160,7 +157,12 @@ tags_from_tables <- function (pg) {
         if (identical (names (i) [1:2], c ("Key", "Value"))) {
             res <- i [, 1:2]
         } else {
-            res <- do.call (rbind, strsplit (i [[1]], split = "="))
+            # "Key" has value, generally "<key>=*", but sometimes multiple
+            # entries separated by commas.
+            keys_i <- unlist (strsplit (i [[1]], ","))
+            keys_i <- grep ("\\=", keys_i, value = TRUE)
+            keys_i <- trimws (keys_i)
+            res <- do.call (rbind, strsplit (keys_i, split = "="))
             res <- data.frame (res)
             names (res) <- c ("Key", "Value")
         }

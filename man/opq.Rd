@@ -6,7 +6,7 @@
 \usage{
 opq(
   bbox = NULL,
-  nodes_only = FALSE,
+  nodes_only,
   osm_types = c("node", "way", "relation"),
   out = c("body", "tags", "meta", "skel", "tags center", "ids"),
   datetime = NULL,
@@ -20,33 +20,32 @@ opq(
 \item{bbox}{Either (i) four numeric values specifying the maximal and minimal
 longitudes and latitudes, in the form \code{c(xmin, ymin, xmax, ymax)}
 or (ii) a character string in the form \code{xmin,ymin,xmax,ymax}. These
-will be passed to \link{getbb} to be converted to a numerical bounding
+will be passed to \code{\link[=getbb]{getbb()}} to be converted to a numerical bounding
 box. Can also be (iii) a matrix representing a bounding polygon as
 returned from \code{getbb(..., format_out = "polygon")}. To search in an
 area, (iv) a character string with a relation or a (closed) way id in
 the format \code{"way(id:1)"}, \code{"relation(id:1, 2)"} or \code{"relation(id:1, 2, 3); way(id:2)"} as returned by \code{getbb(..., format_out = "osm_type_id")}
-or \link{bbox_to_string} with a \code{data.frame} from \code{getbb(..., format_out = "data.frame")} to select all areas combined (relations and ways).}
+or \code{\link[=bbox_to_string]{bbox_to_string()}} with a \code{data.frame} from \code{getbb(..., format_out = "data.frame")} to select all areas combined (relations and ways).}
 
 \item{nodes_only}{WARNING: this parameter is equivalent to
-\code{osm_types = "node"} and will be DEPRECATED. If \code{TRUE}, query OSM nodes
-only. Some OSM structures such as \code{place = "city"} or
-\code{highway = "traffic_signals"} are represented by nodes only. Queries are
-built by default to return all nodes, ways, and relation, but this can
-be very inefficient for node-only queries. Setting this value to \code{TRUE}
-for such cases makes queries more efficient, with data returned in the
-\code{osm_points} list item.}
+\code{osm_types = "node"} and is DEPRECATED. If \code{TRUE}, query OSM nodes
+only.}
 
 \item{osm_types}{A character vector with several OSM types to query: \code{node},
 \code{way} and \code{relation} is the default. \code{nwr}, \code{nw}, \code{wr}, \code{nr} and \code{rel}
-are also valid types. Ignored if \code{nodes_only = TRUE}.
-\code{osm_types = "node"} is equivalent to \code{nodes_only = TRUE}.}
+are also valid types. Some OSM structures such as \code{place = "city"} or
+\code{highway = "traffic_signals"} are represented by nodes only. Queries are
+built by default to return all nodes, ways, and relation, but this can
+be very inefficient for node-only queries. Setting this value to \code{"node"}
+for such cases makes queries more efficient and, in \code{\link[=osmdata_sf]{osmdata_sf()}}, the
+data will be returned in the \code{osm_points} list item only.}
 
 \item{out}{The level of verbosity of the overpass result: \code{body} (geometries
 and tags, the default), \code{tags} (tags without geometry), \code{meta} (like
 body + Timestamp, Version, Changeset, User, User ID of the last
-edition), \code{skel} (geometries only), \verb{tags center} (tags without geometry
-+ the coordinates of the center of the bounding box) and \code{ids} (type and
-id of the objects only).}
+edition), \code{skel} (geometries only), \verb{tags center} (tags without
+geometry + the coordinates of the center of the bounding box) and \code{ids}
+(type and id of the objects only).}
 
 \item{datetime}{If specified, a date and time to extract data from the OSM
 database as it was up to the specified date and time, as described at
@@ -77,9 +76,9 @@ Build an Overpass query
 }
 \details{
 The \code{out} statement for \code{tags}, \verb{tags center}and \code{id}, do not return
-geometries. Neither \code{out = "meta"} nor \code{adiff = TRUE} options are implemented
-for all \verb{osmdata_*} functions yet. Use \link{osmdata_xml} or \link{osmdata_data_frame}
-to get the result of these queries. See the documentation of the \href{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#out}{out statement}
+geometries. \code{adiff = TRUE} option is not implemented for all \verb{osmdata_*} functions yet.
+Use \link{osmdata_xml} or \link{osmdata_data_frame} to get the result of these queries. See the
+documentation of the \href{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#out}{out statement}
 and \href{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#Augmented-difference_between_two_dates_(adiff)}{augmented difference}
 for more details about these options.
 }
@@ -92,49 +91,50 @@ are likely to be rejected.
 }
 \examples{
 \dontrun{
-q <- getbb ("portsmouth", display_name_contains = "United States") \%>\%
-    opq () \%>\%
-    add_osm_feature ("amenity", "restaurant") \%>\%
+q <- getbb ("portsmouth", display_name_contains = "United States") |>
+    opq () |>
+    add_osm_feature ("amenity", "restaurant") |>
     add_osm_feature ("amenity", "pub")
 osmdata_sf (q) # all objects that are restaurants AND pubs (there are none!)
-q1 <- getbb ("portsmouth", display_name_contains = "United States") \%>\%
-    opq () \%>\%
+q1 <- getbb ("portsmouth", display_name_contains = "United States") |>
+    opq () |>
     add_osm_feature ("amenity", "restaurant")
-q2 <- getbb ("portsmouth", display_name_contains = "United States") \%>\%
-    opq () \%>\%
+q2 <- getbb ("portsmouth", display_name_contains = "United States") |>
+    opq () |>
     add_osm_feature ("amenity", "pub")
 c (osmdata_sf (q1), osmdata_sf (q2)) # all restaurants OR pubs
 
-# Use nodes_only to retrieve single point data only, such as for central
+# Use `osm_types = "node"` to retrieve single point data only, such as for central
 # locations of cities.
-opq <- opq (bbox, nodes_only = TRUE) \%>\%
-    add_osm_feature (key = "place", value = "city") \%>\%
+opq <- opq (bbox, osm_types = "node") |>
+    add_osm_feature (key = "place", value = "city") |>
     osmdata_sf (quiet = FALSE)
 
 # Filter by a search area
-qa1 <- getbb ("Catalan Countries", format_out = "osm_type_id") \%>\%
-    opq (nodes_only = TRUE) \%>\%
+qa1 <- getbb ("Catalan Countries", format_out = "osm_type_id") |>
+    opq (osm_types = "node") |>
     add_osm_feature (key = "capital", value = "4")
 opqa1 <- osmdata_sf (qa1)
 # Filter by a multiple search areas
 bb <- getbb ("Vilafranca", format_out = "data.frame")
-qa2 <- bbox_to_string (bb [bb$osm_type != "node", ]) \%>\%
-    opq (nodes_only = TRUE) \%>\%
+qa2 <- bbox_to_string (bb [bb$osm_type != "node", ]) |>
+    opq (osm_types = "node") |>
     add_osm_feature (key = "place")
 opqa2 <- osmdata_sf (qa2)
 }
 }
 \seealso{
-Other queries: 
-\code{\link{add_osm_features}()},
-\code{\link{add_osm_feature}()},
-\code{\link{bbox_to_string}()},
-\code{\link{getbb}()},
-\code{\link{opq_around}()},
-\code{\link{opq_csv}()},
-\code{\link{opq_enclosing}()},
-\code{\link{opq_osm_id}()},
-\code{\link{opq_string}()},
-\code{\link{overpass_status}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=add_osm_features]{add_osm_features()}},
+\code{\link[=bbox_to_string]{bbox_to_string()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=getbb]{getbb()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_csv]{opq_csv()}},
+\code{\link[=opq_enclosing]{opq_enclosing()}},
+\code{\link[=opq_osm_id]{opq_osm_id()}},
+\code{\link[=opq_string]{opq_string()}},
+\code{\link[=overpass_status]{overpass_status()}}
 }
 \concept{queries}

@@ -32,8 +32,8 @@ because the server may time out before all data are delivered.}
 \description{
 Find all features which enclose a given point, and optionally match specific
 'key'-'value' pairs. This function is \emph{not} intended to be combined with
-\link{add_osm_feature}, rather is only to be used in the sequence
-\link{opq_enclosing} -> \link{opq_string} -> \link{osmdata_xml} (or other
+\code{\link[=add_osm_feature]{add_osm_feature()}}, rather is only to be used in the sequence
+\code{\link[=opq_enclosing]{opq_enclosing()}} -> \code{\link[=opq_string]{opq_string()}} -> \code{\link[=osmdata_xml]{osmdata_xml()}} (or other
 extraction function). See examples for how to use.
 }
 \examples{
@@ -43,22 +43,23 @@ lat <- 54.33601
 lon <- -3.07677
 key <- "natural"
 value <- "water"
-x <- opq_enclosing (lon, lat, key, value) \%>\%
-    opq_string () \%>\%
+x <- opq_enclosing (lon, lat, key, value) |>
+    opq_string () |>
     osmdata_sf ()
 }
 }
 \seealso{
-Other queries: 
-\code{\link{add_osm_features}()},
-\code{\link{add_osm_feature}()},
-\code{\link{bbox_to_string}()},
-\code{\link{getbb}()},
-\code{\link{opq_around}()},
-\code{\link{opq_csv}()},
-\code{\link{opq_osm_id}()},
-\code{\link{opq_string}()},
-\code{\link{opq}()},
-\code{\link{overpass_status}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=add_osm_features]{add_osm_features()}},
+\code{\link[=bbox_to_string]{bbox_to_string()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=getbb]{getbb()}},
+\code{\link[=opq]{opq()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_csv]{opq_csv()}},
+\code{\link[=opq_osm_id]{opq_osm_id()}},
+\code{\link[=opq_string]{opq_string()}},
+\code{\link[=overpass_status]{overpass_status()}}
 }
 \concept{queries}

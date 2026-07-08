@@ -32,9 +32,9 @@ pages.}
 \item{out}{The level of verbosity of the overpass result: \code{body} (geometries
 and tags, the default), \code{tags} (tags without geometry), \code{meta} (like
 body + Timestamp, Version, Changeset, User, User ID of the last
-edition), \code{skel} (geometries only), \verb{tags center} (tags without geometry
-+ the coordinates of the center of the bounding box) and \code{ids} (type and
-id of the objects only).}
+edition), \code{skel} (geometries only), \verb{tags center} (tags without
+geometry + the coordinates of the center of the bounding box) and \code{ids}
+(type and id of the objects only).}
 
 \item{datetime}{If specified, a date and time to extract data from the OSM
 database as it was up to the specified date and time, as described at
@@ -58,35 +58,33 @@ because the server may time out before all data are delivered.}
 may need to be increased in order to handle large queries.}
 }
 \value{
-\link{opq} object
+An \link{opq} object.
 }
 \description{
 Add a feature specified by OSM ID to an Overpass query
 }
 \note{
 Extracting elements by ID requires explicitly specifying the type of
-element. Only elements of one of the three given types can be extracted in a
-single query, but the results of multiple types can nevertheless be combined
-with the \link{c} operation of \link{osmdata}.
+element.
 }
 \examples{
 \dontrun{
 id <- c (1489221200, 1489221321, 1489221491)
-dat1 <- opq_osm_id (type = "node", id = id) \%>\%
-    opq_string () \%>\%
+dat1 <- opq_osm_id (type = "node", id = id) |>
+    opq_string () |>
     osmdata_sf ()
 dat1$osm_points # the desired nodes
 id <- c (136190595, 136190596)
-dat2 <- opq_osm_id (type = "way", id = id) \%>\%
-    opq_string () \%>\%
+dat2 <- opq_osm_id (type = "way", id = id) |>
+    opq_string () |>
     osmdata_sf ()
 dat2$osm_lines # the desired ways
 dat <- c (dat1, dat2) # The node and way data combined
 # All in one (same result as dat)
 id <- c (1489221200, 1489221321, 1489221491, 136190595, 136190596)
 type <- c ("node", "node", "node", "way", "way")
-datAiO <- opq_osm_id (id = id, type = type) \%>\%
-    opq_string () \%>\%
+datAiO <- opq_osm_id (id = id, type = type) |>
+    opq_string () |>
     osmdata_sf ()
 }
 }
@@ -94,16 +92,17 @@ datAiO <- opq_osm_id (id = id, type = type) \%>\%
 \url{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#By_element_id}
 }
 \seealso{
-Other queries: 
-\code{\link{add_osm_features}()},
-\code{\link{add_osm_feature}()},
-\code{\link{bbox_to_string}()},
-\code{\link{getbb}()},
-\code{\link{opq_around}()},
-\code{\link{opq_csv}()},
-\code{\link{opq_enclosing}()},
-\code{\link{opq_string}()},
-\code{\link{opq}()},
-\code{\link{overpass_status}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=add_osm_features]{add_osm_features()}},
+\code{\link[=bbox_to_string]{bbox_to_string()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=getbb]{getbb()}},
+\code{\link[=opq]{opq()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_csv]{opq_csv()}},
+\code{\link[=opq_enclosing]{opq_enclosing()}},
+\code{\link[=opq_string]{opq_string()}},
+\code{\link[=overpass_status]{overpass_status()}}
 }
 \concept{queries}

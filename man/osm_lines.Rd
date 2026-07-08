@@ -2,12 +2,12 @@
 % Please edit documentation in R/osm-extract.R
 \name{osm_lines}
 \alias{osm_lines}
-\title{Extract all \code{osm_lines} from an osmdata object}
+\title{Extract all \code{osm_lines} from an \code{osmdata_sf} object}
 \usage{
 osm_lines(dat, id)
 }
 \arguments{
-\item{dat}{An object of class \link{osmdata}}
+\item{dat}{An object of class \code{osmdata_sf}}
 
 \item{id}{OSM identification of one or more objects for which lines are to be
 extracted}
@@ -23,16 +23,16 @@ polygon.
 }
 \examples{
 \dontrun{
-dat <- opq ("hengelo nl") \%>\%
-    add_osm_feature (key = "highway") \%>\%
+dat <- opq ("hengelo nl") |>
+    add_osm_feature (key = "highway") |>
     osmdata_sf ()
-bus <- dat$osm_points [which (dat$osm_points$highway == "bus_stop"), ] \%>\%
+bus <- dat$osm_points [which (dat$osm_points$highway == "bus_stop"), ] |>
     rownames () # all OSM IDs of bus stops
 osm_lines (dat, bus) # all highways containing bus stops
 
 # All lines which intersect with Piccadilly Circus in London, UK
-dat <- opq ("Fitzrovia London") \%>\%
-    add_osm_feature (key = "highway") \%>\%
+dat <- opq ("Fitzrovia London") |>
+    add_osm_feature (key = "highway") |>
     osmdata_sf ()
 i <- which (dat$osm_polygons$name == "Piccadilly Circus")
 id <- rownames (dat$osm_polygons [i, ])
@@ -40,10 +40,10 @@ osm_lines (dat, id)
 }
 }
 \seealso{
-Other search: 
-\code{\link{osm_multilines}()},
-\code{\link{osm_multipolygons}()},
-\code{\link{osm_points}()},
-\code{\link{osm_polygons}()}
+Other search:
+\code{\link[=osm_multilines]{osm_multilines()}},
+\code{\link[=osm_multipolygons]{osm_multipolygons()}},
+\code{\link[=osm_points]{osm_points()}},
+\code{\link[=osm_polygons]{osm_polygons()}}
 }
 \concept{search}

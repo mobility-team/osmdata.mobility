@@ -1,32 +1,54 @@
-#' Return an OSM Overpass query as a \link{data.frame} object.
+#' Return an OSM Overpass query as a [data.frame] object.
 #'
 #'
-#' @inheritParams osmdata_sp
+#' @inheritParams osmdata_sf
 #' @param q An object of class `overpass_query` constructed with
-#'      \link{opq} and \link{add_osm_feature}. May be be omitted,
-#'      in which case the attributes of the \link{data.frame} will not include
-#'      the query.
+#'      [opq()] and [add_osm_feature()] or a string with a valid query, such
+#'      as `"(node(39.4712701,-0.3841326,39.4713799,-0.3839475);); out;"`.
+#'      May be be omitted, in which case the attributes of the [data.frame]
+#'      will not include the query. See examples below.
 #' @param stringsAsFactors Should character strings in the 'data.frame' be
 #'      coerced to factors?
-#' @return A `data.frame` with id, type and tags of the the objects from the
-#'      query.
+#' @return A `data.frame` inheriting from `osmdata_data.frame` class with id, type
+#'      and tags of the the objects from the query.
 #'
 #' @details If you are not interested in the geometries of the results, it's a
 #'      good option to query for objects that match the features only and forget
 #'      about members of the ways and relations. You can achieve this by passing
-#'      the parameter `body = "tags"` to \code{\link{opq}}.
+#'      the parameter `body = "tags"` to [opq()].
 #'
 #' @family extract
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' hampi_df <- opq ("hampi india") %>%
-#'     add_osm_feature (key = "historic", value = "ruins") %>%
-#'     osmdata_data_frame ()
+#' query <- opq ("hampi india") |>
+#'     add_osm_feature (key = "historic", value = "ruins")
+#' # Then extract data from 'Overpass' API
+#' hampi_df <- osmdata_data_frame (query)
 #' attr (hampi_df, "bbox")
 #' attr (hampi_df, "overpass_call")
 #' attr (hampi_df, "meta")
+#' }
+#'
+#' # Complex query as a string (not possible with regular osmdata functions)
+#' q <- '[out:csv(::type, ::id, "name:ca", "wikidata")][timeout:50];
+#'     area[name="Països Catalans"][boundary=political]->.boundaryarea;
+#'
+#'     rel(area.boundaryarea)[admin_level=8][boundary=administrative];
+#'     map_to_area -> .all_level_8_areas;
+#'
+#'     ( nwr(area.boundaryarea)[amenity=townhall]; >; );
+#'     is_in;
+#'     area._[admin_level=8][boundary=administrative] -> .level_8_areas_with_townhall;
+#'
+#'     (.all_level_8_areas; - .level_8_areas_with_townhall;);
+#'     rel(pivot);
+#'     out tags;'
+#'
+#' \dontrun{
+#' no_townhall <- osmdata_data_frame (q)
+#' no_townhall
 #' }
 osmdata_data_frame <- function (q,
                                 doc,
@@ -45,7 +67,7 @@ osmdata_data_frame <- function (q,
         if (!quiet) {
             message ("q missing: osmdata object will not include query")
         }
-    } else if (is (q, "overpass_query")) {
+    } else if (inherits (q, "overpass_query")) {
         obj$bbox <- q$bbox
         obj$overpass_call <- opq_string_intern (q, quiet = quiet)
     } else if (is.character (q)) {
@@ -75,7 +97,8 @@ osmdata_data_frame <- function (q,
             colClasses = "character", # osm_id doesn't fit in integer
             check.names = FALSE,
             comment.char = "",
-            stringsAsFactors = stringsAsFactors
+            stringsAsFactors = stringsAsFactors,
+            encoding = "UTF-8"
         )
     } else if (isTRUE (obj$meta$query_type == "adiff")) {
         datetime_from <- obj$meta$datetime_from
@@ -102,6 +125,7 @@ osmdata_data_frame <- function (q,
     attr (df, "bbox") <- obj$bbox
     attr (df, "overpass_call") <- obj$overpass_call
     attr (df, "meta") <- obj$meta
+    class (df) <- c ("osmdata_data.frame", class (df))
 
     return (df)
 }
@@ -122,13 +146,15 @@ xml_to_df <- function (doc, stringsAsFactors = FALSE) {
 
     tags <- mapply (function (i, k) {
         i <- i [, k, drop = FALSE] # remove osm_id column if exists
+        out <- matrix (
+            NA_character_,
+            nrow = nrow (i), ncol = length (keys),
+            dimnames = list (NULL, keys)
+        )
+        out <- enc2utf8 (out)
         out <- data.frame (
-            matrix (
-                nrow = nrow (i), ncol = length (keys),
-                dimnames = list (NULL, keys)
-            ),
-            stringsAsFactors = stringsAsFactors,
-            check.names = FALSE
+            out,
+            stringsAsFactors = stringsAsFactors, check.names = FALSE
         )
         out [, names (i)] <- i
         return (out)
@@ -214,6 +240,7 @@ xml_adiff_to_df <- function (doc,
     tags_u <- xml2::xml_find_all (osm_actions, xpath = ".//tag")
     col_names <- sort (unique (xml2::xml_attr (tags_u, attr = "k")))
     m <- matrix (
+        NA_character_,
         nrow = length (osm_obj), ncol = length (col_names),
         dimnames = list (NULL, col_names)
     )
@@ -225,6 +252,7 @@ xml_adiff_to_df <- function (doc,
         tagV <- vapply (tag, function (x) x, FUN.VALUE = character (2))
         m [i, tagV [1, ]] <- tagV [2, ]
     }
+    m <- enc2utf8 (m)
 
     osm_type <- xml2::xml_name (osm_obj)
     osm_id <- xml2::xml_attr (osm_obj, "id")
@@ -325,6 +353,7 @@ get_meta_from_xml <- function (osm_obj) {
             osm_uid = xml2::xml_attr (osm_obj, attr = "uid"),
             osm_user = xml2::xml_attr (osm_obj, attr = "user")
         )
+        out$osm_user <- enc2utf8 (out$osm_user)
 
     } else {
         out <- matrix (nrow = length (osm_obj), ncol = 0)

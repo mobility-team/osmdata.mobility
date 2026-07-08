@@ -5,9 +5,9 @@ templates:
     bootswatch: cerulean
 
 reference:
-  - title: Package doc and class
+  - title: Package classes
     contents:
-    - has_concept("package")
+    - has_concept("class")
   - title: Overpass server
     contents:
     - has_concept("overpass")
@@ -28,23 +28,10 @@ reference:
     - has_concept("transform")
 
 articles:
-  - title: The osmdata.mobility package
+  - title: The osmdata package
     contents:
     - osmdata
     - osmdata-sc
     - osm-sf-translation
     - query-split
 
-navbar:
-  title: osmdata.mobility
-  type: default
-  left:
-  - text: Home
-    href: index.html
-  - text: Articles
-    href: articles/index.html
-  - text: Functions
-    href: reference/index.html
-  right:
-  - icon: fa-github fa-lg
-    href: https://github.com/mobility-team/osmdata.mobility

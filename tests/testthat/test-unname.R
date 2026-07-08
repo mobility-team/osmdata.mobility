@@ -1,10 +1,3 @@
-context ("unname-osmdata-sf")
-
-skip_if (!test_all)
-
-has_internet <- curl::has_internet ()
-skip_if (!has_internet)
-
 require (sf)
 
 test_that ("unname", {

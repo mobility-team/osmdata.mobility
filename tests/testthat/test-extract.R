@@ -1,5 +1,3 @@
-context ("extract-objects")
-
 # ------------------- void values
 test_that ("osm_points-void", {
     expect_error (
@@ -12,7 +10,7 @@ test_that ("osm_points-void", {
     )
     expect_error (
         osm_points (1, 1),
-        "dat must be of class osmdata"
+        "dat must be of class `osmdata_sf`"
     )
     q0 <- opq (bbox = c (1, 1, 5, 5))
     x <- osmdata_sf (q0, test_path ("fixtures", "osm-multi.osm"))
@@ -41,7 +39,7 @@ test_that ("osm_lines-void", {
     )
     expect_error (
         osm_lines (1, 1),
-        "dat must be of class osmdata"
+        "dat must be of class `osmdata_sf`"
     )
     q0 <- opq (bbox = c (1, 1, 5, 5))
     x <- osmdata_sf (q0, test_path ("fixtures", "osm-multi.osm"))
@@ -70,7 +68,7 @@ test_that ("osm_polygons-void", {
     )
     expect_error (
         osm_polygons (1, 1),
-        "dat must be of class osmdata"
+        "dat must be of class `osmdata_sf`"
     )
     q0 <- opq (bbox = c (1, 1, 5, 5))
     x <- osmdata_sf (q0, test_path ("fixtures", "osm-multi.osm"))
@@ -99,7 +97,7 @@ test_that ("osm_multilines-void", {
     )
     expect_error (
         osm_multilines (1, 1),
-        "dat must be of class osmdata"
+        "dat must be of class `osmdata_sf`"
     )
     q0 <- opq (bbox = c (1, 1, 5, 5))
     x <- osmdata_sf (q0, test_path ("fixtures", "osm-multi.osm"))
@@ -128,7 +126,7 @@ test_that ("osm_multipolygons-void", {
     )
     expect_error (
         osm_multipolygons (1, 1),
-        "dat must be of class osmdata"
+        "dat must be of class `osmdata_sf`"
     )
     q0 <- opq (bbox = c (1, 1, 5, 5))
     x <- osmdata_sf (q0, test_path ("fixtures", "osm-multi.osm"))

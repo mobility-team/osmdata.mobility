@@ -3,32 +3,31 @@
 #' @param bbox Either (i) four numeric values specifying the maximal and minimal
 #'      longitudes and latitudes, in the form \code{c(xmin, ymin, xmax, ymax)}
 #'      or (ii) a character string in the form \code{xmin,ymin,xmax,ymax}. These
-#'      will be passed to \link{getbb} to be converted to a numerical bounding
+#'      will be passed to [getbb()] to be converted to a numerical bounding
 #'      box. Can also be (iii) a matrix representing a bounding polygon as
 #'      returned from `getbb(..., format_out = "polygon")`. To search in an
 #'      area, (iv) a character string with a relation or a (closed) way id in
 #'      the format `"way(id:1)"`, `"relation(id:1, 2)"` or `"relation(id:1, 2,
 #'      3); way(id:2)"` as returned by `getbb(..., format_out = "osm_type_id")`
-#'      or \link{bbox_to_string} with a `data.frame` from `getbb(..., format_out
+#'      or [bbox_to_string()] with a `data.frame` from `getbb(..., format_out
 #'      = "data.frame")` to select all areas combined (relations and ways).
 #' @param nodes_only WARNING: this parameter is equivalent to
-#'      `osm_types = "node"` and will be DEPRECATED. If `TRUE`, query OSM nodes
-#'      only. Some OSM structures such as `place = "city"` or
-#'      `highway = "traffic_signals"` are represented by nodes only. Queries are
-#'      built by default to return all nodes, ways, and relation, but this can
-#'      be very inefficient for node-only queries. Setting this value to `TRUE`
-#'      for such cases makes queries more efficient, with data returned in the
-#'      `osm_points` list item.
+#'      `osm_types = "node"` and is DEPRECATED. If `TRUE`, query OSM nodes
+#'      only.
 #' @param osm_types A character vector with several OSM types to query: `node`,
 #'      `way` and `relation` is the default. `nwr`, `nw`, `wr`, `nr` and `rel`
-#'      are also valid types. Ignored if `nodes_only = TRUE`.
-#'      `osm_types = "node"` is equivalent to `nodes_only = TRUE`.
+#'      are also valid types. Some OSM structures such as `place = "city"` or
+#'      `highway = "traffic_signals"` are represented by nodes only. Queries are
+#'      built by default to return all nodes, ways, and relation, but this can
+#'      be very inefficient for node-only queries. Setting this value to `"node"`
+#'      for such cases makes queries more efficient and, in [osmdata_sf()], the
+#'      data will be returned in the `osm_points` list item only.
 #' @param out The level of verbosity of the overpass result: `body` (geometries
 #'      and tags, the default), `tags` (tags without geometry), `meta` (like
 #'      body + Timestamp, Version, Changeset, User, User ID of the last
-#'      edition), `skel` (geometries only), `tags center` (tags without geometry
-#'      + the coordinates of the center of the bounding box) and `ids` (type and
-#'      id of the objects only).
+#'      edition), `skel` (geometries only), `tags center` (tags without
+#'      geometry + the coordinates of the center of the bounding box) and `ids`
+#'      (type and id of the objects only).
 #' @param datetime If specified, a date and time to extract data from the OSM
 #'      database as it was up to the specified date and time, as described at
 #'      \url{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#date}.
@@ -50,9 +49,9 @@
 #' @return An `overpass_query` object
 #'
 #' @details The `out` statement for `tags`, `tags center`and `id`, do not return
-#' geometries. Neither `out = "meta"` nor `adiff = TRUE` options are implemented
-#' for all `osmdata_*` functions yet. Use [osmdata_xml] or [osmdata_data_frame]
-#' to get the result of these queries. See the documentation of the [out
+#' geometries. `adiff = TRUE` option is not implemented for all `osmdata_*` functions yet.
+#' Use [osmdata_xml] or [osmdata_data_frame] to get the result of these queries. See the
+#' documentation of the [out
 #' statement](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#out)
 #' and [augmented
 #' difference](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#Augmented-difference_between_two_dates_(adiff))
@@ -69,38 +68,38 @@
 #'
 #' @examples
 #' \dontrun{
-#' q <- getbb ("portsmouth", display_name_contains = "United States") %>%
-#'     opq () %>%
-#'     add_osm_feature ("amenity", "restaurant") %>%
+#' q <- getbb ("portsmouth", display_name_contains = "United States") |>
+#'     opq () |>
+#'     add_osm_feature ("amenity", "restaurant") |>
 #'     add_osm_feature ("amenity", "pub")
 #' osmdata_sf (q) # all objects that are restaurants AND pubs (there are none!)
-#' q1 <- getbb ("portsmouth", display_name_contains = "United States") %>%
-#'     opq () %>%
+#' q1 <- getbb ("portsmouth", display_name_contains = "United States") |>
+#'     opq () |>
 #'     add_osm_feature ("amenity", "restaurant")
-#' q2 <- getbb ("portsmouth", display_name_contains = "United States") %>%
-#'     opq () %>%
+#' q2 <- getbb ("portsmouth", display_name_contains = "United States") |>
+#'     opq () |>
 #'     add_osm_feature ("amenity", "pub")
 #' c (osmdata_sf (q1), osmdata_sf (q2)) # all restaurants OR pubs
 #'
-#' # Use nodes_only to retrieve single point data only, such as for central
+#' # Use `osm_types = "node"` to retrieve single point data only, such as for central
 #' # locations of cities.
-#' opq <- opq (bbox, nodes_only = TRUE) %>%
-#'     add_osm_feature (key = "place", value = "city") %>%
+#' opq <- opq (bbox, osm_types = "node") |>
+#'     add_osm_feature (key = "place", value = "city") |>
 #'     osmdata_sf (quiet = FALSE)
 #'
 #' # Filter by a search area
-#' qa1 <- getbb ("Catalan Countries", format_out = "osm_type_id") %>%
-#'     opq (nodes_only = TRUE) %>%
+#' qa1 <- getbb ("Catalan Countries", format_out = "osm_type_id") |>
+#'     opq (osm_types = "node") |>
 #'     add_osm_feature (key = "capital", value = "4")
 #' opqa1 <- osmdata_sf (qa1)
 #' # Filter by a multiple search areas
 #' bb <- getbb ("Vilafranca", format_out = "data.frame")
-#' qa2 <- bbox_to_string (bb [bb$osm_type != "node", ]) %>%
-#'     opq (nodes_only = TRUE) %>%
+#' qa2 <- bbox_to_string (bb [bb$osm_type != "node", ]) |>
+#'     opq (osm_types = "node") |>
 #'     add_osm_feature (key = "place")
 #' opqa2 <- osmdata_sf (qa2)
 #' }
-opq <- function (bbox = NULL, nodes_only = FALSE,
+opq <- function (bbox = NULL, nodes_only,
                  osm_types = c ("node", "way", "relation"),
                  out = c ("body", "tags", "meta", "skel", "tags center", "ids"),
                  datetime = NULL, datetime2 = NULL, adiff = FALSE,
@@ -109,24 +108,33 @@ opq <- function (bbox = NULL, nodes_only = FALSE,
     timeout <- format (timeout, scientific = FALSE)
     prefix <- paste0 ("[out:xml][timeout:", timeout, "]")
 
-    if (nodes_only) {
-        osm_types <- "node"
-    } else {
-        osm_types <- try (
-            match.arg (osm_types,
-                choices = c (
-                    "node", "way", "rel", "relation",
-                    "nwr", "nw", "wr", "nr"
-                ),
-                several.ok = TRUE
-        ), silent = TRUE)
-        if (inherits (osm_types, "try-error")) {
-            stop ('osm_types parameter must be a vector with values from ',
-                '"node", "way", "rel", "relation", ',
-                '"nwr", "nw", "wr" and "nr".',
-                call. = FALSE
-            )
+    if (!missing (nodes_only)) {
+        .Deprecated (
+            new = 'osm_types = "node"',
+            package = "osmdata",
+            old = "nodes_only = TRUE"
+        )
+        if (nodes_only) {
+            osm_types <- "node"
         }
+    }
+
+    osm_types <- try (
+        match.arg (osm_types,
+            choices = c (
+                "node", "way", "rel", "relation",
+                "nwr", "nw", "wr", "nr"
+            ),
+            several.ok = TRUE
+        ),
+        silent = TRUE
+    )
+    if (inherits (osm_types, "try-error")) {
+        stop ("osm_types parameter must be a vector with values from ",
+            '"node", "way", "rel", "relation", ',
+            '"nwr", "nw", "wr" and "nr".',
+            call. = FALSE
+        )
     }
 
     out <- try (match.arg (out), silent = TRUE)
@@ -137,7 +145,7 @@ opq <- function (bbox = NULL, nodes_only = FALSE,
         )
     }
 
-    has_geometry <- !nodes_only && out %in% c ("body", "meta", "skel")
+    has_geometry <- !all (osm_types == "node") && out %in% c ("body", "meta", "skel")
     if (has_geometry) {
         suffix <- paste0 (");\n(._;>;);\nout ", out, ";") # recurse down
     } else {
@@ -193,7 +201,6 @@ opq <- function (bbox = NULL, nodes_only = FALSE,
     class (res) <- c (class (res), "overpass_query")
     attr (res, "datetime") <- datetime
     attr (res, "datetime2") <- datetime2
-    attr (res, "nodes_only") <- nodes_only
 
     return (res)
 }
@@ -204,8 +211,8 @@ paste_features <- function (key, value, key_pre = "", bind = "=",
     if (is.null (value)) {
 
         feature <- ifelse (substring (key, 1, 1) == "!",
-                sprintf ('[!"%s"]', substring (key, 2, nchar (key))),
-                sprintf ('["%s"]', key)
+            sprintf ('[!"%s"]', substring (key, 2, nchar (key))),
+            sprintf ('["%s"]', key)
         )
 
     } else {
@@ -256,24 +263,24 @@ paste_features <- function (key, value, key_pre = "", bind = "=",
 #' not sensitive to case
 #' @param bbox optional bounding box for the feature query; must be set if no
 #'        opq query bbox has been set
-#' @return \link{opq} object
+#' @return An [opq] object.
 #'
 #' @note `key_exact` should generally be `TRUE`, because OSM uses a
 #' reasonably well defined set of possible keys, as returned by
-#' \link{available_features}. Setting `key_exact = FALSE` allows matching
+#' [available_features()]. Setting `key_exact = FALSE` allows matching
 #' of regular expressions on OSM keys, as described in Section 6.1.5 of
 #' <https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL>. The actual
 #' query submitted to the overpass API can be obtained from
-#' \link{opq_string}.
+#' [opq_string()].
 #'
 #' @references <https://wiki.openstreetmap.org/wiki/Map_Features>
-#' @seealso [add_osm_features]
+#' @seealso [add_osm_features()]
 #'
 #' @section `add_osm_feature` vs `add_osm_features`:
-#' Features defined within an [add_osm_features] call are combined with a
+#' Features defined within an [add_osm_features()] call are combined with a
 #' logical OR.
 #'
-#' Chained calls to either [add_osm_feature] or `add_osm_features()` combines
+#' Chained calls to either `add_osm_feature()` or [add_osm_features()] combines
 #' features from these calls in a logical AND; this is analagous to chaining
 #' `dplyr::filter()` on a data frame.
 #'
@@ -285,31 +292,40 @@ paste_features <- function (key, value, key_pre = "", bind = "=",
 #'
 #' @examples
 #' \dontrun{
-#' q <- opq ("portsmouth usa") %>%
+#' q <- opq ("portsmouth usa") |>
 #'     add_osm_feature (
 #'         key = "amenity",
 #'         value = "restaurant"
-#'     ) %>%
+#'     ) |>
 #'     add_osm_feature (key = "amenity", value = "pub")
 #' osmdata_sf (q) # all objects that are restaurants AND pubs (there are none!)
-#' q1 <- opq ("portsmouth usa") %>%
+#' q1 <- opq ("portsmouth usa") |>
 #'     add_osm_feature (
 #'         key = "amenity",
 #'         value = "restaurant"
 #'     )
-#' q2 <- opq ("portsmouth usa") %>%
+#' q2 <- opq ("portsmouth usa") |>
 #'     add_osm_feature (key = "amenity", value = "pub")
 #' c (osmdata_sf (q1), osmdata_sf (q2)) # all restaurants OR pubs
+#'
 #' # Use of negation to extract all non-primary highways
-#' q <- opq ("portsmouth uk") %>%
+#' q <- opq ("portsmouth uk") |>
 #'     add_osm_feature (key = "highway", value = "!primary")
 #'
 #' # key negation without warnings
-#' q3 <- opq ("Vinçà", osm_type="node") %>%
-#'     add_osm_feature (key = c("name", "!name:ca"))
-#' q4 <- opq ("el Carxe", osm_type="node") %>%
-#'     add_osm_feature (key = "natural", value = "peak") %>%
+#' q3 <- opq ("Vinçà", osm_type = "node") |>
+#'     add_osm_feature (key = c ("name", "!name:ca"))
+#' cat (opq_string (q3))
+#' q4 <- opq ("el Carxe", osm_type = "node") |>
+#'     add_osm_feature (key = "natural", value = "peak") |>
 #'     add_osm_feature (key = "!ele")
+#' cat (opq_string (q4))
+#'
+#' # Get objects with keys (`natural` OR `waterway`) AND `name`
+#' q_keys <- opq ("Badia del Vallès", osm_types = "nwr", out = "tags") |>
+#'     add_osm_features (features = list (natural = NULL, waterway = NULL)) |>
+#'     add_osm_feature (key = "name")
+#' cat (opq_string (q_keys))
 #' }
 add_osm_feature <- function (opq,
                              key,
@@ -341,7 +357,7 @@ add_osm_feature <- function (opq,
         key, value, bind_key_pre$key_pre, bind_key_pre$bind,
         match_case, value_exact
     )
-    feature<- paste (feature, collapse = " ")
+    feature <- paste (feature, collapse = " ")
 
     if (is.null (opq$features)) {
         opq$features <- feature
@@ -349,10 +365,10 @@ add_osm_feature <- function (opq,
         opq$features <- paste (opq$features, feature)
     }
 
-    if (any (w <- !grepl("\\[(\\\"|~)", opq$features))) {
-        warning(
+    if (any (w <- !grepl ("\\[(\\\"|~)", opq$features))) {
+        warning (
             "The query will request objects whith only a negated key (",
-            paste (opq$features[w], collapse = ", "), ") , which can be quite ",
+            paste (opq$features [w], collapse = ", "), ") , which can be quite ",
             "expensive for overpass servers. Add other features or be shure ",
             "that that is what you want. To avoid this warning, reorder your ",
             "calls to add_osm_feature/s and leave key negations at the end."
@@ -462,7 +478,7 @@ check_bind_key_pre <- function (bind = "=", key_pre = "") {
 
 #' Add multiple features to an Overpass query
 #'
-#' Alternative version of \link{add_osm_feature} for creating single queries
+#' Alternative version of [add_osm_feature()] for creating single queries
 #' with multiple features. Key-value matching may be controlled by using the
 #' filter symbols described in
 #' \url{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#By_tag_.28has-kv.29}.
@@ -475,7 +491,7 @@ check_bind_key_pre <- function (bind = "=", key_pre = "") {
 #'      quotations. See examples for details.
 #' @param bbox optional bounding box for the feature query; must be set if no
 #'      opq query bbox has been set.
-#' @return \link{opq} object
+#' @return An [opq] object.
 #'
 #' @references \url{https://wiki.openstreetmap.org/wiki/Map_Features}
 #' @seealso [add_osm_feature]
@@ -485,26 +501,33 @@ check_bind_key_pre <- function (bind = "=", key_pre = "") {
 #'
 #' @examples
 #' \dontrun{
-#' q <- opq ("portsmouth usa") %>%
+#' q <- opq ("portsmouth usa") |>
 #'     add_osm_features (features = list (
 #'         "amenity" = "restaurant",
 #'         "amenity" = "pub"
 #'     ))
 #'
-#' q <- opq ("portsmouth usa") %>%
+#' q <- opq ("portsmouth usa") |>
 #'     add_osm_features (features = c (
 #'         "\"amenity\"=\"restaurant\"",
 #'         "\"amenity\"=\"pub\""
 #'     ))
+#' cat (opq_string (q))
 #' # This extracts in a single query the same result as the following:
-#' q1 <- opq ("portsmouth usa") %>%
+#' q1 <- opq ("portsmouth usa") |>
 #'     add_osm_feature (
 #'         key = "amenity",
 #'         value = "restaurant"
 #'     )
-#' q2 <- opq ("portsmouth usa") %>%
+#' q2 <- opq ("portsmouth usa") |>
 #'     add_osm_feature (key = "amenity", value = "pub")
 #' c (osmdata_sf (q1), osmdata_sf (q2)) # all restaurants OR pubs
+#'
+#' # Get objects with keys (`natural` OR `waterway`) AND `name`
+#' q_keys <- opq ("Badia del Vallès", osm_types = "nwr", out = "tags") |>
+#'     add_osm_features (features = list (natural = NULL, waterway = NULL)) |>
+#'     add_osm_feature (key = "name")
+#' cat (opq_string (q_keys))
 #' }
 add_osm_features <- function (opq,
                               features,
@@ -534,9 +557,12 @@ add_osm_features <- function (opq,
                 key_exact = key_exact
             )
 
-        features <- mapply (function (key, value, key_pre, bind) {
-                paste_features (key, value, key_pre = key_pre, bind = bind,
-                    match_case = TRUE, value_exact = value_exact)
+        features <- mapply (
+            function (key, value, key_pre, bind) {
+                paste_features (key, value,
+                    key_pre = key_pre, bind = bind,
+                    match_case = TRUE, value_exact = value_exact
+                )
             },
             key = names (features), value = features,
             key_pre = bind_key_pre$key_pre, bind = bind_key_pre$bind,
@@ -592,6 +618,85 @@ check_features <- function (features) {
     }
 }
 
+
+#' Add an user filter to an Overpass query
+#'
+#' Select objects last edited or ever touched by a specific user.
+#'
+#' @param opq An `overpass_query` object.
+#' @param user A vector of user names or user ids. If `is.numeric(user)` or
+#'     `all(grepl(^[0-9]+$, user`)), assumes that `user` is a user id.
+#' @param touched If `TRUE`, selects objects of which at least one version has been edited
+#'     by `user`. If `FALSE` (default), selects objects with `user` as the last editor
+#'     only.
+#' @param is_uid If `FALSE`, assume that `user` are user names. Useful to filter for a
+#'     user name which contains numbers only and otherwise would be considered an user id.
+#'
+#' @details
+#' The order of `filter_osm_user()` in a query construction is not relevant and is applied
+#' to the whole query (i.e. it affects all the statements of the query).
+#'
+#' See
+#' \url{https://dev.overpass-api.de/overpass-doc/en/criteria/misc_criteria.html#by_user}
+#' for details.
+#'
+#'
+#' @returns An [opq] object.
+#'
+#' @family queries
+#' @export
+#'
+#' @examples
+#' # Notice the "::user" and "::uid" fields in the opq_csv()
+#' q_csv <- opq (bbox = "relation(id:11755232)", out = "meta", osm_type = "node") |>
+#'     filter_osm_user (user = "jmaspons") |>
+#'     add_osm_feature (key = "name") |>
+#'     opq_csv (c ("::type", "::id", "name", "name:ca", "::user", "::uid"))
+#' cat (opq_string (q_csv))
+#' # Warning: csv queries can fail without errors in long running queries. For timeouts,
+#' # it returns empty results.
+#' \dontrun{
+#' d_csv <- osmdata_data_frame (q_csv)
+#' d_csv
+#' }
+#'
+#' q_touched <- opq (
+#'     bbox = "relation(id:11755232)", out = "meta",
+#'     osm_type = "node", timeout = 100
+#' ) |>
+#'     filter_osm_user (user = "jmaspons", touched = TRUE) |>
+#'     add_osm_feature (key = "name")
+#' cat (opq_string (q_touched))
+#' \dontrun{
+#' d_touched <- osmdata_data_frame (q_touched)
+#' d_touched
+#' }
+filter_osm_user <- function (opq, user, touched = FALSE, is_uid) {
+    if (missing (is_uid)) {
+        is_uid <- is.numeric (user) || all (grepl ("^[0-9]+$", user))
+    }
+    stopifnot (is.logical (is_uid))
+
+    opq$user <- if (is_uid) {
+        user <- paste (user, collapse = ",")
+        if (touched) {
+            paste0 ("(uid_touched:", user, ")")
+        } else {
+            paste0 ("(uid:", user, ")")
+        }
+    } else {
+        user <- paste (user, collapse = "\",\"")
+        if (touched) {
+            paste0 ("(user_touched:\"", user, "\")")
+        } else {
+            paste0 ("(user:\"", user, "\")")
+        }
+    }
+
+    return (opq)
+}
+
+
 #' Add a feature specified by OSM ID to an Overpass query
 #'
 #' @inheritParams opq
@@ -604,15 +709,13 @@ check_features <- function (features) {
 #' @param open_url If `TRUE`, open the OSM page of the specified object in web
 #'      browser. Multiple objects (`id` values) will be opened in multiple
 #'      pages.
-#' @return \link{opq} object
+#' @return An [opq] object.
 #'
 #' @references
 #' \url{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#By_element_id}
 #'
 #' @note Extracting elements by ID requires explicitly specifying the type of
-#' element. Only elements of one of the three given types can be extracted in a
-#' single query, but the results of multiple types can nevertheless be combined
-#' with the \link{c} operation of \link{osmdata}.
+#' element.
 #'
 #' @family queries
 #' @export
@@ -620,21 +723,21 @@ check_features <- function (features) {
 #' @examples
 #' \dontrun{
 #' id <- c (1489221200, 1489221321, 1489221491)
-#' dat1 <- opq_osm_id (type = "node", id = id) %>%
-#'     opq_string () %>%
+#' dat1 <- opq_osm_id (type = "node", id = id) |>
+#'     opq_string () |>
 #'     osmdata_sf ()
 #' dat1$osm_points # the desired nodes
 #' id <- c (136190595, 136190596)
-#' dat2 <- opq_osm_id (type = "way", id = id) %>%
-#'     opq_string () %>%
+#' dat2 <- opq_osm_id (type = "way", id = id) |>
+#'     opq_string () |>
 #'     osmdata_sf ()
 #' dat2$osm_lines # the desired ways
 #' dat <- c (dat1, dat2) # The node and way data combined
 #' # All in one (same result as dat)
 #' id <- c (1489221200, 1489221321, 1489221491, 136190595, 136190596)
 #' type <- c ("node", "node", "node", "way", "way")
-#' datAiO <- opq_osm_id (id = id, type = type) %>%
-#'     opq_string () %>%
+#' datAiO <- opq_osm_id (id = id, type = type) |>
+#'     opq_string () |>
 #'     osmdata_sf ()
 #' }
 opq_osm_id <- function (id = NULL, type = NULL, open_url = FALSE,
@@ -686,7 +789,7 @@ opq_osm_id <- function (id = NULL, type = NULL, open_url = FALSE,
         # nocov start
         u <- paste0 ("https://openstreetmap.org/", type [1], "/", id)
         for (i in u) {
-            browseURL (i)
+            utils::browseURL (i)
         }
         # nocov end
     }
@@ -698,8 +801,8 @@ opq_osm_id <- function (id = NULL, type = NULL, open_url = FALSE,
 #'
 #' Find all features which enclose a given point, and optionally match specific
 #' 'key'-'value' pairs. This function is \emph{not} intended to be combined with
-#' \link{add_osm_feature}, rather is only to be used in the sequence
-#' \link{opq_enclosing} -> \link{opq_string} -> \link{osmdata_xml} (or other
+#' [add_osm_feature()], rather is only to be used in the sequence
+#' [opq_enclosing()] -> [opq_string()] -> [osmdata_xml()] (or other
 #' extraction function). See examples for how to use.
 #'
 #' @param lon Longitude of desired point
@@ -718,8 +821,8 @@ opq_osm_id <- function (id = NULL, type = NULL, open_url = FALSE,
 #' lon <- -3.07677
 #' key <- "natural"
 #' value <- "water"
-#' x <- opq_enclosing (lon, lat, key, value) %>%
-#'     opq_string () %>%
+#' x <- opq_enclosing (lon, lat, key, value) |>
+#'     opq_string () |>
 #'     osmdata_sf ()
 #' }
 #' @family queries
@@ -756,7 +859,6 @@ opq_enclosing <- function (lon = NULL, lat = NULL,
     )
     class (res) <- c (class (res), "overpass_query")
     attr (res, "datetime") <- attr (res, "datetime2") <- NULL
-    attr (res, "nodes_only") <- FALSE
     attr (res, "enclosing") <- enclosing
 
     return (res)
@@ -766,8 +868,8 @@ opq_enclosing <- function (lon = NULL, lat = NULL,
 #'
 #' Find all features around a given point, and optionally match specific
 #' 'key'-'value' pairs. This function is \emph{not} intended to be combined with
-#' \link{add_osm_feature}, rather is only to be used in the sequence
-#' \link{opq_around} -> \link{osmdata_xml} (or other extraction function). See
+#' [add_osm_feature()], rather is only to be used in the sequence
+#' [opq_around()] -> [osmdata_xml()] (or other extraction function). See
 #' examples for how to use.
 #'
 #' @param radius Radius in metres around the point for which data should be
@@ -782,7 +884,7 @@ opq_enclosing <- function (lon = NULL, lat = NULL,
 #' key <- "amenity"
 #' value <- "bench"
 #' radius <- 100
-#' x <- opq_around (lon, lat, radius, key, value) %>%
+#' x <- opq_around (lon, lat, radius, key, value) |>
 #'     osmdata_sf ()
 #' }
 #' @family queries
@@ -818,7 +920,7 @@ opq_around <- function (lon, lat, radius = 15,
 #' Transform an Overpass query to return the result in a csv format
 #'
 #' @param q A opq string or an object of class `overpass_query` constructed with
-#'     \link{opq} or alternative opq builders (+ \link{add_osm_feature}/s).
+#'     [opq()] or alternative opq builders (+ [add_osm_feature()]/s).
 #' @param fields a character vector with the field names.
 #' @param header if \code{FALSE}, do not ask for column names.
 #'
@@ -827,7 +929,7 @@ opq_around <- function (lon, lat, radius = 15,
 #'
 #' @details The output format `csv`, ask for results in csv. See
 #'  [CSV output mode](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#CSV_output_mode)
-#'  for details. To get the data, use \link{osmdata_data_frame}.
+#'  for details. To get the data, use [osmdata_data_frame()].
 #'
 #' @note csv queries that reach the timeout will return a 0 row data.frame
 #'    without any warning. Increase `timeout` in `q` if you don't see the
@@ -838,37 +940,37 @@ opq_around <- function (lon, lat, radius = 15,
 #'
 #' @examples
 #' \dontrun{
-#' q <- getbb ("Catalan Countries", format_out = "osm_type_id") %>%
-#'     opq (out = "tags center", osm_type = "relation", timeout = 100) %>%
-#'     add_osm_feature ("admin_level", "7") %>%
-#'     add_osm_feature ("boundary", "administrative") %>%
-#'     opq_csv (fields = c("name", "::type", "::id", "::lat", "::lon"))
+#' q <- getbb ("Catalan Countries", format_out = "osm_type_id") |>
+#'     opq (out = "tags center", osm_type = "relation", timeout = 100) |>
+#'     add_osm_feature ("admin_level", "7") |>
+#'     add_osm_feature ("boundary", "administrative") |>
+#'     opq_csv (fields = c ("name", "::type", "::id", "::lat", "::lon"))
 #' comarques <- osmdata_data_frame (q) # without timeout parameter, 0 rows
 #'
-#' qid<- opq_osm_id (
+#' qid <- opq_osm_id (
 #'     type = "relation",
 #'     id = c ("341530", "1809102", "1664395", "343124"),
 #'     out = "tags"
-#' ) %>%
+#' ) |>
 #'     opq_csv (fields = c ("name", "name:ca"))
 #' cities <- osmdata_data_frame (qid)
 #' }
 opq_csv <- function (q, fields, header = TRUE) {
 
-    if (!inherits (q, c("overpass_query", "character"))) {
+    if (!inherits (q, c ("overpass_query", "character"))) {
         stop ("q must be an overpass query or a character string.")
     }
     if (!inherits (fields, "character")) {
         stop ("fields must be a character vector.")
     }
 
-    fields <- vapply(fields, function (x) {
-        if (substr(x, 1, 2) != "::") {
-            x <- paste0("\"", x, "\"")
+    fields <- vapply (fields, function (x) {
+        if (substr (x, 1, 2) != "::") {
+            x <- paste0 ("\"", x, "\"")
         }
         return (x)
-    }, FUN.VALUE = character(1), USE.NAMES = FALSE)
-    fields <- paste (fields, collapse=", ")
+    }, FUN.VALUE = character (1), USE.NAMES = FALSE)
+    fields <- paste (fields, collapse = ", ")
 
     csv_prefix <- paste0 (
         "[out:csv(", fields,
@@ -915,71 +1017,71 @@ opq_string_intern <- function (opq, quiet = TRUE) {
 
     lat <- lon <- NULL # suppress no visible binding messages
 
-    if (attr (opq, "nodes_only")) {
-        opq$osm_types <- "node"
-    }
-
     map_to_area <- grepl ("(node|way|relation|rel)\\(id:[0-9, ]+\\)", opq$bbox)
 
     res <- NULL
     if (!is.null (opq$features)) { # opq with add_osm_feature
 
-        features <- opq$features
+        filters <- opq$features
 
-        if (length (features) > 1L) { # from add_osm_features fn
+        if (length (filters) > 1L) { # from add_osm_features()
 
-            features <- vapply (features, function (i) {
+            filters <- vapply (filters, function (i) {
                 paste (i, collapse = "")
             },
-            character (1),
+            FUN.VALUE = character (1),
             USE.NAMES = FALSE
             )
         }
 
+        if (!is.null (opq$user)) { # from filter_osm_user()
+            filters <- paste (filters, opq$user)
+        }
+
         if (!is.null (attr (opq, "enclosing"))) {
 
-            if (length (features) > 1) {
+            if (length (filters) > 1) {
                 stop ("enclosing queries can only accept one feature")
             }
 
             lat <- strsplit (opq$bbox, ",") [[1]] [1]
             lon <- strsplit (opq$bbox, ",") [[1]] [2]
-            features <- paste0 (
+            filters <- paste0 (
                 "is_in(", lat, ",",
                 lon, ")->.a;",
                 attr (opq, "enclosing"),
                 "(pivot.a)",
-                features,
+                filters,
                 ";"
             )
 
         } else {
 
-            types_features <- expand.grid (
-                osm_types=opq$osm_types,
-                features=features,
+            types_filters <- expand.grid (
+                osm_types = opq$osm_types,
+                filters = filters,
                 stringsAsFactors = FALSE
             )
 
             if (!map_to_area) {
-                features <-  c (sprintf ("  %s %s (%s);\n",
-                                         types_features$osm_types,
-                                         types_features$features,
-                                         opq$bbox
-                                )
-                )
-
+                filters <- c (sprintf (
+                    "  %s %s (%s);\n",
+                    types_filters$osm_types,
+                    types_filters$filters,
+                    opq$bbox
+                ))
             } else {
                 opq$prefix <- gsub ("\n$", "", opq$prefix)
                 search_area <- paste0 (
                     opq$bbox,
                     "; map_to_area->.searchArea; );\n(\n"
                 )
-                features <- c (
+                filters <- c (
                     search_area,
-                    sprintf ("  %s %s (area.searchArea);\n",
-                             types_features$osm_types,
-                             types_features$features
+                    sprintf (
+                        "  %s %s (area.searchArea);\n",
+                        types_filters$osm_types,
+                        types_filters$filters
                     )
                 )
             }
@@ -987,7 +1089,7 @@ opq_string_intern <- function (opq, quiet = TRUE) {
 
         res <- paste0 (
             opq$prefix,
-            paste (features, collapse = ""),
+            paste (filters, collapse = ""),
             opq$suffix
         )
 
@@ -1002,7 +1104,7 @@ opq_string_intern <- function (opq, quiet = TRUE) {
         id <- paste (id, collapse = "")
         res <- paste0 (opq$prefix, id, opq$suffix)
 
-    } else { # straight opq with neither features nor ID specified
+    } else { # straight opq with neither tag filters nor ID specified
 
         if (!quiet) {
             message (
@@ -1014,14 +1116,14 @@ opq_string_intern <- function (opq, quiet = TRUE) {
         }
 
         if (!map_to_area) {
-            bbox <- sprintf ("  %s (%s);\n", opq$osm_types, opq$bbox)
+            bbox <- sprintf ("  %s (%s);\n", paste (opq$osm_types, opq$user), opq$bbox)
         } else {
-                opq$prefix <- gsub ("\n$", "", opq$prefix)
+            opq$prefix <- gsub ("\n$", "", opq$prefix)
             search_area <-
                 paste0 (opq$bbox, "; map_to_area->.searchArea; );\n(\n")
             bbox <- c (
                 search_area,
-                sprintf ("  %s (area.searchArea);\n", opq$osm_types)
+                sprintf ("  %s (area.searchArea);\n", paste (opq$osm_types, opq$user))
             )
         }
 

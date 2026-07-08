@@ -37,13 +37,15 @@
 #' get_overpass_url
 #'
 #' Return the URL of the specified overpass API. Default is
-#' <https://overpass-api.de/api/interpreter/>.
+#' `https://overpass-api.de/api/interpreter/`.
 #'
 #' @return The overpass API URL
 #'
 #' @seealso [set_overpass_url()]
 #'
 #' @family overpass
+#' @examples
+#' get_overpass_url ()
 #' @export
 get_overpass_url <- function () {
 

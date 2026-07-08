@@ -1,20 +1,53 @@
-#' Return an OSM Overpass query as an \link{osmdata} object in \pkg{sf}
-#' format.
+#' Return an OSM Overpass query as an [osmdata] object in \pkg{sf} format.
 #'
-#' @inheritParams osmdata_sp
+#' @note In 'dplyr'-type workflows in which the output of this function is
+#' piped to other functions, it will generally be necessary to explicitly load
+#' the \pkg{sf} package into the current workspace with 'library(sf)'.
+#'
+#' @param q An object of class `overpass_query` constructed with
+#'      [opq()] and [add_osm_feature()] or a string with a valid query, such
+#'      as `"(node(39.4712701,-0.3841326,39.4713799,-0.3839475);); out;"`.
+#'      May be be omitted, in which case the [osmdata] object will not
+#'      include the query. See examples below.
+#' @param doc If missing, `doc` is obtained by issuing the overpass query,
+#'      `q`, otherwise either the name of a file from which to read data,
+#'      or an object of class \pkg{xml2} returned from [osmdata_xml()].
+#' @param quiet suppress status messages.
 #' @param stringsAsFactors Should character strings in 'sf' 'data.frame' be
-#' coerced to factors?
-#' @return An object of class `osmdata` with the OSM components (points, lines,
-#'         and polygons) represented in \pkg{sf} format.
+#'      coerced to factors?
+#' @return An object of class `osmdata_sf` with the OSM components (points,
+#'      lines, and polygons) represented in \pkg{sf} format.
 #'
 #' @family extract
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' hampi_sf <- opq ("hampi india") %>%
-#'     add_osm_feature (key = "historic", value = "ruins") %>%
-#'     osmdata_sf ()
+#' query <- opq ("hampi india") |>
+#'     add_osm_feature (key = "historic", value = "ruins")
+#' # Then extract data from 'Overpass' API
+#' hampi_sf <- osmdata_sf (query)
+#' }
+#'
+#' # Complex query as a string (not possible with regular osmdata functions)
+#' q <- '[out:xml][timeout:50];
+#'     area[name="Països Catalans"][boundary=political]->.boundaryarea;
+#'
+#'     rel(area.boundaryarea)[admin_level=8][boundary=administrative];
+#'     map_to_area -> .all_level_8_areas;
+#'
+#'     ( nwr(area.boundaryarea)[amenity=townhall]; >; );
+#'     is_in;
+#'     area._[admin_level=8][boundary=administrative] -> .level_8_areas_with_townhall;
+#'
+#'     (.all_level_8_areas; - .level_8_areas_with_townhall;);
+#'     rel(pivot);
+#'     (._; >;);
+#'     out;'
+#'
+#' \dontrun{
+#' no_townhall <- osmdata_sf (q)
+#' no_townhall
 #' }
 osmdata_sf <- function (q, doc, quiet = TRUE, stringsAsFactors = FALSE) { # nolint
 
@@ -30,7 +63,7 @@ osmdata_sf <- function (q, doc, quiet = TRUE, stringsAsFactors = FALSE) { # noli
         if (!quiet) {
             message ("q missing: osmdata object will not include query")
         }
-    } else if (is (q, "overpass_query")) {
+    } else if (inherits (q, "overpass_query")) {
         obj$bbox <- q$bbox
         obj$overpass_call <- opq_string_intern (q, quiet = quiet)
     } else if (is.character (q)) {
@@ -39,7 +72,7 @@ osmdata_sf <- function (q, doc, quiet = TRUE, stringsAsFactors = FALSE) { # noli
         stop ("q must be an overpass query or a character string")
     }
 
-    check_not_implemented_queries (obj)
+    check_not_implemented_queries (obj, meta = TRUE)
 
     temp <- fill_overpass_data (obj, doc, quiet = quiet)
     obj <- temp$obj
@@ -56,14 +89,19 @@ osmdata_sf <- function (q, doc, quiet = TRUE, stringsAsFactors = FALSE) { # noli
     # some objects don't have names. As explained in
     # src/osm_convert::restructure_kv_mat, these instances do not get an osm_id
     # column (the first one), so this is appended here:
-    if (!"osm_id" %in% names (res$points_kv)[1]) {
+    if (!"osm_id" %in% names (res$points_kv) [1]) {
         res <- fill_kv (res, "points_kv", "points", stringsAsFactors)
     }
-    if (!"osm_id" %in% names (res$polygons_kv)[1]) {
+    if (!"osm_id" %in% names (res$polygons_kv) [1]) {
         res <- fill_kv (res, "polygons_kv", "polygons", stringsAsFactors)
     }
-    kv_df <- grep ("_kv$", names (res))
-    res[kv_df] <- fix_columns_list (res[kv_df])
+    kv_df <- grep ("_kv$", names (res)) # objects with tags
+    res [kv_df] <- fix_columns_list (res [kv_df])
+    res [kv_df] <- lapply (res [kv_df], setenc_utf8)
+
+    res [paste0 (sf_types, "_meta")] <- lapply (sf_types, function (type) {
+        get_meta_from_cpp_output (res, type)
+    })
 
     if (missing (q)) {
         obj$bbox <- paste (res$bbox, collapse = " ")
@@ -78,7 +116,7 @@ osmdata_sf <- function (q, doc, quiet = TRUE, stringsAsFactors = FALSE) { # noli
         )
     }
 
-    class (obj) <- c (class (obj), "osmdata_sf")
+    class (obj) <- c ("osmdata_sf", class (obj))
 
     return (obj)
 }
@@ -121,6 +159,8 @@ make_sf <- function (..., stringsAsFactors = FALSE) { # nolint
         )
     }
 
+    df <- merge_duplicated_col_names (df)
+
     object <- as.list (substitute (list (...))) [-1L]
     arg_nm <- sapply (object, function (x) deparse (x)) # nolint
     sfc_name <- make.names (arg_nm [sf_column])
@@ -134,6 +174,34 @@ make_sf <- function (..., stringsAsFactors = FALSE) { # nolint
     names (f) <- names (df) [-ncol (df)]
     attr (df, "agr") <- f
     class (df) <- c ("sf", class (df))
+
+    return (df)
+}
+
+#' Merge any `sf` `data.frame` columns which have mixed-case duplicated names
+#' (like "This" and "this"; #348).
+#'
+#' @param df a `data.frame`
+#' @return Returns the `df` without duplicated columnms. If both values in a
+#'   row of the duplicated columns are not NA, use the value of the first column.
+#'
+#' @noRd
+merge_duplicated_col_names <- function (df) {
+
+    nms_lower <- tolower (names (df))
+    dups <- which (duplicated (nms_lower))
+    if (length (dups) > 0L) {
+        dup_nms <- nms_lower [dups]
+        cols_to_rm <- NULL
+        for (nm in dup_nms) {
+            index <- which (nms_lower == nm)
+            df [, index [1]] <- apply (df [, index], 1, function (i) {
+                ifelse (all (is.na (i)), i [1], i [which (!is.na (i)) [1]])
+            })
+            cols_to_rm <- c (cols_to_rm, index [2])
+        }
+        df <- df [, -(cols_to_rm)]
+    }
 
     return (df)
 }
@@ -167,7 +235,7 @@ fill_kv <- function (res, kv_name, g_name, stringsAsFactors) { # nolint
 
 
 fill_sf_objects <- function (res, obj, type = "points",
-                          stringsAsFactors = FALSE) { # nolint
+                             stringsAsFactors = FALSE) { # nolint
 
     if (!type %in% sf_types) {
         stop ("type must be one of ", paste (sf_types, collapse = " "))
@@ -176,15 +244,28 @@ fill_sf_objects <- function (res, obj, type = "points",
     geometry <- res [[type]]
     obj_name <- paste0 ("osm_", type)
     kv_name <- paste0 (type, "_kv")
+    meta_name <- paste0 (type, "_meta")
 
     if (length (res [[kv_name]]) > 0) {
 
         if (!stringsAsFactors) {
             res [[kv_name]] [] <- lapply (res [[kv_name]], as.character)
         }
+        df <- data.frame ( # sort columns osm_id, osm_type, meta, tags
+            res [[kv_name]] [, intersect (
+                c ("osm_id", "osm_type"),
+                names (res [[kv_name]])
+            ), drop = FALSE],
+            res [[meta_name]],
+            res [[kv_name]] [, setdiff (
+                names (res [[kv_name]]),
+                c ("osm_id", "osm_type")
+            ), drop = FALSE],
+            check.names = FALSE
+        )
         obj [[obj_name]] <- make_sf (
             geometry,
-            res [[kv_name]],
+            df,
             stringsAsFactors = stringsAsFactors
         )
 

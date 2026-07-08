@@ -2,21 +2,21 @@
 % Please edit documentation in R/get-osmdata-sp.R
 \name{osmdata_sp}
 \alias{osmdata_sp}
-\title{Return an OSM Overpass query as an \link{osmdata} object in \pkg{sp}
+\title{DEPRECATED: Return an OSM Overpass query as an \link{osmdata} object in \pkg{sp}
 format.}
 \usage{
 osmdata_sp(q, doc, quiet = TRUE)
 }
 \arguments{
 \item{q}{An object of class \code{overpass_query} constructed with
-\link{opq} and \link{add_osm_feature}. May be be omitted,
-in which case the \link{osmdata} object will not include the
-query.}
+\code{\link[=opq]{opq()}} and \code{\link[=add_osm_feature]{add_osm_feature()}} or a string with a valid query, such
+as \code{"(node(39.4712701,-0.3841326,39.4713799,-0.3839475);); out;"}.
+May be be omitted, in which case the \link{osmdata} object will not
+include the query. See examples below.}
 
 \item{doc}{If missing, \code{doc} is obtained by issuing the overpass query,
 \code{q}, otherwise either the name of a file from which to read data,
-or an object of class \pkg{xml2} returned from
-\link{osmdata_xml}.}
+or an object of class \pkg{xml2} returned from \code{\link[=osmdata_xml]{osmdata_xml()}}.}
 
 \item{quiet}{suppress status messages.}
 }
@@ -25,21 +25,43 @@ An object of class \code{osmdata} with the OSM components (points, lines,
 and polygons) represented in \pkg{sp} format.
 }
 \description{
-Return an OSM Overpass query as an \link{osmdata} object in \pkg{sp}
+DEPRECATED: Return an OSM Overpass query as an \link{osmdata} object in \pkg{sp}
 format.
 }
 \examples{
 \dontrun{
-hampi_sp <- opq ("hampi india") \%>\%
-    add_osm_feature (key = "historic", value = "ruins") \%>\%
-    osmdata_sp ()
+query <- opq ("hampi india") |>
+    add_osm_feature (key = "historic", value = "ruins")
+# Then extract data from 'Overpass' API
+hampi_sp <- osmdata_sp (query)
+}
+
+# Complex query as a string (not possible with regular osmdata functions)
+q <- '[out:xml][timeout:50];
+    area[name="Països Catalans"][boundary=political]->.boundaryarea;
+
+    rel(area.boundaryarea)[admin_level=8][boundary=administrative];
+    map_to_area -> .all_level_8_areas;
+
+    ( nwr(area.boundaryarea)[amenity=townhall]; >; );
+    is_in;
+    area._[admin_level=8][boundary=administrative] -> .level_8_areas_with_townhall;
+
+    (.all_level_8_areas; - .level_8_areas_with_townhall;);
+    rel(pivot);
+    (._; >;);
+    out;'
+
+\dontrun{
+no_townhall <- osmdata_sp (q)
+no_townhall
 }
 }
 \seealso{
-Other extract: 
-\code{\link{osmdata_data_frame}()},
-\code{\link{osmdata_sc}()},
-\code{\link{osmdata_sf}()},
-\code{\link{osmdata_xml}()}
+Other extract:
+\code{\link[=osmdata_data_frame]{osmdata_data_frame()}},
+\code{\link[=osmdata_sc]{osmdata_sc()}},
+\code{\link[=osmdata_sf]{osmdata_sf()}},
+\code{\link[=osmdata_xml]{osmdata_xml()}}
 }
 \concept{extract}

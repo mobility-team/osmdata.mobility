@@ -17,17 +17,23 @@ next available slot
 \description{
 Retrieve status of the Overpass API
 }
+\examples{
+\dontrun{
+overpass_status ()
+}
+}
 \seealso{
-Other queries: 
-\code{\link{add_osm_features}()},
-\code{\link{add_osm_feature}()},
-\code{\link{bbox_to_string}()},
-\code{\link{getbb}()},
-\code{\link{opq_around}()},
-\code{\link{opq_csv}()},
-\code{\link{opq_enclosing}()},
-\code{\link{opq_osm_id}()},
-\code{\link{opq_string}()},
-\code{\link{opq}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=add_osm_features]{add_osm_features()}},
+\code{\link[=bbox_to_string]{bbox_to_string()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=getbb]{getbb()}},
+\code{\link[=opq]{opq()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_csv]{opq_csv()}},
+\code{\link[=opq_enclosing]{opq_enclosing()}},
+\code{\link[=opq_osm_id]{opq_osm_id()}},
+\code{\link[=opq_string]{opq_string()}}
 }
 \concept{queries}

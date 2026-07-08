@@ -1,8 +1,3 @@
-context ("sf-osm")
-
-test_all <- (identical (Sys.getenv ("MPADGE_LOCAL"), "true") |
-    identical (Sys.getenv ("GITHUB_WORKFLOW"), "test-coverage"))
-
 test_that ("multipolygon", {
     osm_multi <- test_path ("fixtures", "osm-multi.osm")
     x_sf <- sf::st_read (
@@ -40,8 +35,7 @@ test_that ("multipolygon", {
     g <- x$geometry
     g_sf <- x_sf$geometry
     attrs <- names (attributes (g))
-    # if (!test_all) # CRS is no longer idencial because x has
-    # proj4strin
+    # CRS is not identical (x: st_crs(4326); x_sf: st_crs("WGS84"))
     attrs <- attrs [attrs != "crs"]
     for (a in attrs) {
         expect_identical (attr (g, a), attr (g_sf, a))
@@ -77,7 +71,7 @@ test_that ("multilinestring", {
     g <- x$geometry
     g_sf <- x_sf$geometry
     attrs <- names (attributes (g))
-    # if (!test_all)
+    # CRS is not identical (x: st_crs(4326); x_sf: st_crs("WGS84"))
     attrs <- attrs [attrs != "crs"]
     for (a in attrs) {
         expect_identical (attr (g, a), attr (g_sf, a))
@@ -120,11 +114,37 @@ test_that ("ways", {
     g <- x$geometry
     g_sf <- x_sf$geometry
     attrs <- names (attributes (g))
-    # if (!test_all)
+    # CRS is not identical (x: st_crs(4326); x_sf: st_crs("WGS84"))
     attrs <- attrs [attrs != "crs"]
     for (a in attrs) {
         expect_identical (attr (g, a), attr (g_sf, a))
     }
+})
+
+
+test_that ("out meta", {
+    q <- opq_osm_id (id = "3278525", type = "relation", out = "meta")
+
+    osm_meta <- test_path ("fixtures", "osm-meta_geom.osm")
+    doc <- xml2::read_xml (osm_meta)
+
+    x <- osmdata_sf (q, doc, quiet = FALSE)
+    x_no_call <- osmdata_sf (doc = doc)
+
+    cols <- c (
+        "osm_id", "osm_version", "osm_timestamp",
+        "osm_changeset", "osm_uid", "osm_user"
+    )
+    lapply (
+        x [c ("osm_points", "osm_polygons", "osm_multipolygons")],
+        function (sf) expect_named (as.data.frame (sf) [, 1:6], cols)
+    )
+    lapply (
+        x_no_call [c ("osm_points", "osm_polygons", "osm_multipolygons")],
+        function (sf) expect_named (as.data.frame (sf) [, 1:6], cols)
+    )
+    expect_s3_class (x, "osmdata_sf")
+    expect_s3_class (x_no_call, "osmdata_sf")
 })
 
 
@@ -133,23 +153,53 @@ test_that ("non-valid key names", {
     q0 <- opq (bbox = c (1, 1, 5, 5))
     x <- osmdata_sf (q0, osm_multi)
 
-    k <- lapply (x[grep ("osm_", names(x))], function (f) {
+    k <- lapply (x [grep ("osm_", names (x))], function (f) {
         expect_true ("name:ca" %in% names (f))
     })
 })
 
+
 test_that ("clashes in key names", {
     osm_multi_key_clashes <- test_path ("fixtures", "osm-key_clashes.osm")
     q0 <- opq (bbox = c (1, 1, 5, 5))
-    expect_warning(
+    expect_warning (
         x <- osmdata_sf (q0, osm_multi_key_clashes),
         "Feature keys clash with id or metadata columns and will be renamed by "
     )
 
     expect_false (any (duplicated (names (x$osm_points))))
     # x$osm_points don't have osm_id column in tags TODO?
-    k <- lapply (x[grep ("osm_", names (x))[-1]], function (f) {
+    k <- lapply (x [grep ("osm_", names (x)) [-1]], function (f) {
         expect_false (any (duplicated (names (f))))
         expect_true (all (c ("osm_id", "osm_id.1") %in% names (f)))
     })
+})
+
+
+test_that ("duplicated column names", {
+    # https://github.com/ropensci/osmdata/issues/348
+    osm_ways <- test_path ("fixtures", "osm-ways.osm")
+
+    q0 <- opq (bbox = c (1, 1, 5, 5))
+    x0 <- osmdata_sf (q0, osm_ways)$osm_lines
+    expect_true ("boat" %in% names (x0))
+    x0_boat <- x0$boat [which (!is.na (x0$boat))]
+    expect_equal (x0_boat, "yes")
+
+    # Read those data and insert new node with duplicated name.
+    # This requires much less code read as text rather than xml:
+    x <- readLines (osm_ways)
+    i <- grep ("\"boat\"", x)
+    x_i <- gsub ("yes", "no", gsub ("boat", "Boat", x [i]))
+    x <- c (x [seq_len (i)], x_i, x [seq (i + 1L, length (x))])
+    ftmp <- tempfile (fileext = ".osm")
+    writeLines (x, ftmp)
+
+    # Note that XML parses capitals before lowercase, so "boat" is merged into
+    # "Boat"
+    x1 <- osmdata_sf (q0, ftmp)$osm_lines
+    expect_false ("boat" %in% names (x1))
+    expect_true ("Boat" %in% names (x1))
+    x1_boat <- x1$Boat [which (!is.na (x1$Boat))]
+    expect_equal (x1_boat, "no")
 })

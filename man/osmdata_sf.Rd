@@ -2,21 +2,20 @@
 % Please edit documentation in R/get-osmdata-sf.R
 \name{osmdata_sf}
 \alias{osmdata_sf}
-\title{Return an OSM Overpass query as an \link{osmdata} object in \pkg{sf}
-format.}
+\title{Return an OSM Overpass query as an \link{osmdata} object in \pkg{sf} format.}
 \usage{
 osmdata_sf(q, doc, quiet = TRUE, stringsAsFactors = FALSE)
 }
 \arguments{
 \item{q}{An object of class \code{overpass_query} constructed with
-\link{opq} and \link{add_osm_feature}. May be be omitted,
-in which case the \link{osmdata} object will not include the
-query.}
+\code{\link[=opq]{opq()}} and \code{\link[=add_osm_feature]{add_osm_feature()}} or a string with a valid query, such
+as \code{"(node(39.4712701,-0.3841326,39.4713799,-0.3839475);); out;"}.
+May be be omitted, in which case the \link{osmdata} object will not
+include the query. See examples below.}
 
 \item{doc}{If missing, \code{doc} is obtained by issuing the overpass query,
 \code{q}, otherwise either the name of a file from which to read data,
-or an object of class \pkg{xml2} returned from
-\link{osmdata_xml}.}
+or an object of class \pkg{xml2} returned from \code{\link[=osmdata_xml]{osmdata_xml()}}.}
 
 \item{quiet}{suppress status messages.}
 
@@ -24,25 +23,51 @@ or an object of class \pkg{xml2} returned from
 coerced to factors?}
 }
 \value{
-An object of class \code{osmdata} with the OSM components (points, lines,
-and polygons) represented in \pkg{sf} format.
+An object of class \code{osmdata_sf} with the OSM components (points,
+lines, and polygons) represented in \pkg{sf} format.
 }
 \description{
-Return an OSM Overpass query as an \link{osmdata} object in \pkg{sf}
-format.
+Return an OSM Overpass query as an \link{osmdata} object in \pkg{sf} format.
+}
+\note{
+In 'dplyr'-type workflows in which the output of this function is
+piped to other functions, it will generally be necessary to explicitly load
+the \pkg{sf} package into the current workspace with 'library(sf)'.
 }
 \examples{
 \dontrun{
-hampi_sf <- opq ("hampi india") \%>\%
-    add_osm_feature (key = "historic", value = "ruins") \%>\%
-    osmdata_sf ()
+query <- opq ("hampi india") |>
+    add_osm_feature (key = "historic", value = "ruins")
+# Then extract data from 'Overpass' API
+hampi_sf <- osmdata_sf (query)
+}
+
+# Complex query as a string (not possible with regular osmdata functions)
+q <- '[out:xml][timeout:50];
+    area[name="Països Catalans"][boundary=political]->.boundaryarea;
+
+    rel(area.boundaryarea)[admin_level=8][boundary=administrative];
+    map_to_area -> .all_level_8_areas;
+
+    ( nwr(area.boundaryarea)[amenity=townhall]; >; );
+    is_in;
+    area._[admin_level=8][boundary=administrative] -> .level_8_areas_with_townhall;
+
+    (.all_level_8_areas; - .level_8_areas_with_townhall;);
+    rel(pivot);
+    (._; >;);
+    out;'
+
+\dontrun{
+no_townhall <- osmdata_sf (q)
+no_townhall
 }
 }
 \seealso{
-Other extract: 
-\code{\link{osmdata_data_frame}()},
-\code{\link{osmdata_sc}()},
-\code{\link{osmdata_sp}()},
-\code{\link{osmdata_xml}()}
+Other extract:
+\code{\link[=osmdata_data_frame]{osmdata_data_frame()}},
+\code{\link[=osmdata_sc]{osmdata_sc()}},
+\code{\link[=osmdata_sp]{osmdata_sp()}},
+\code{\link[=osmdata_xml]{osmdata_xml()}}
 }
 \concept{extract}

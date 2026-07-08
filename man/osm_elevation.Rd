@@ -7,10 +7,11 @@
 osm_elevation(dat, elev_file)
 }
 \arguments{
-\item{dat}{An \code{SC} object produced by \link{osmdata_sc}.}
+\item{dat}{An \code{SC} object produced by \code{\link[=osmdata_sc]{osmdata_sc()}}.}
 
 \item{elev_file}{A vector of one or more character strings specifying paths
-to \code{.tif} files containing global elevation data.}
+to \code{.tif} files (or anything that \pkg{terra} can read) containing global
+elevation data. \code{.zip} files will be uncompressed.}
 }
 \value{
 A modified version of the input \code{dat} with an additional \code{z_} column
@@ -20,13 +21,26 @@ appended to the vertices.
 Add elevation data to a previously-extracted OSM data set, using a
 pre-downloaded global elevation file from
 \url{https://srtm.csi.cgiar.org/srtmdata/}. Currently only works for
-\code{SC}-class objects returned from \link{osmdata_sc}.
+\code{SC}-class objects returned from \code{\link[=osmdata_sc]{osmdata_sc()}}.
+}
+\examples{
+\dontrun{
+query <- opq ("omaha nebraska") |>
+    add_osm_feature (key = "highway")
+# Elevation can only be applied to \pkg{silicate} 'SC'-class data:
+dat <- osmdata_sc (query)
+dat$vertex
+# The vertex table will have columns ("x_", "y_", "vertex_"). Then
+# download elevation data from \url{https://srtm.csi.cgiar.org/srtmdata/}
+# (or elsewhere), and add elevation column, "z_" with:
+dat <- osm_elevation (dat, elev_file = "/path/to/elevation/data.tiff")
+}
 }
 \seealso{
-Other transform: 
-\code{\link{osm_poly2line}()},
-\code{\link{trim_osmdata}()},
-\code{\link{unique_osmdata}()},
-\code{\link{unname_osmdata_sf}()}
+Other transform:
+\code{\link[=osm_poly2line]{osm_poly2line()}},
+\code{\link[=trim_osmdata]{trim_osmdata()}},
+\code{\link[=unique_osmdata]{unique_osmdata()}},
+\code{\link[=unname_osmdata_sf]{unname_osmdata_sf()}}
 }
 \concept{transform}

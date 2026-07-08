@@ -1,9 +1,9 @@
-#' Return an OSM Overpass query as an \link{osmdata} object in
+#' Return an OSM Overpass query as an `osmdata_sc` object in
 #' `silicate` (`SC`) format.
 #'
-#' @inheritParams osmdata_sp
-#' @return An object of class `osmdata_sc` representing the original OSM hierarchy
-#'      of nodes, ways, and relations.
+#' @inheritParams osmdata_sf
+#' @return An object of class `osmdata_sc` representing the original OSM
+#'      hierarchy of nodes, ways, and relations.
 #'
 #' @note The `silicate` format is currently highly experimental, and
 #'      recommended for use only if you really know what you're doing.
@@ -13,9 +13,31 @@
 #'
 #' @examples
 #' \dontrun{
-#' hampi_sf <- opq ("hampi india") %>%
-#'     add_osm_feature (key = "historic", value = "ruins") %>%
-#'     osmdata_sc ()
+#' query <- opq ("hampi india") |>
+#'     add_osm_feature (key = "historic", value = "ruins")
+#' # Then extract data from 'Overpass' API
+#' hampi_sc <- osmdata_sc (query)
+#' }
+#'
+#' # Complex query as a string (not possible with regular osmdata functions)
+#' q <- '[out:xml][timeout:50];
+#'     area[name="Països Catalans"][boundary=political]->.boundaryarea;
+#'
+#'     rel(area.boundaryarea)[admin_level=8][boundary=administrative];
+#'     map_to_area -> .all_level_8_areas;
+#'
+#'     ( nwr(area.boundaryarea)[amenity=townhall]; >; );
+#'     is_in;
+#'     area._[admin_level=8][boundary=administrative] -> .level_8_areas_with_townhall;
+#'
+#'     (.all_level_8_areas; - .level_8_areas_with_townhall;);
+#'     rel(pivot);
+#'     (._; >;);
+#'     out;'
+#'
+#' \dontrun{
+#' no_townhall <- osmdata_sc (q)
+#' no_townhall
 #' }
 osmdata_sc <- function (q, doc, quiet = TRUE) {
 
@@ -31,7 +53,7 @@ osmdata_sc <- function (q, doc, quiet = TRUE) {
         if (!quiet) {
             message ("q missing: osmdata object will not include query")
         }
-    } else if (is (q, "overpass_query")) {
+    } else if (inherits (q, "overpass_query")) {
         obj$bbox <- q$bbox
         obj$overpass_call <- opq_string_intern (q, quiet = quiet)
     } else if (is.character (q)) {
@@ -75,6 +97,12 @@ osmdata_sc <- function (q, doc, quiet = TRUE) {
         overpass_version = temp$obj$meta$overpass_version
     )
 
+    has_tags <- c ("nodes", "relation_properties", "object")
+    obj [has_tags] <- lapply (obj [has_tags], function (x) {
+        x [, c ("key", "value")] <- setenc_utf8 (x [, c ("key", "value")])
+        x
+    })
+
     if (!missing (q)) {
         if (!is.character (q)) {
             obj$meta$bbox <- q$bbox
@@ -92,7 +120,7 @@ osmdata_sc <- function (q, doc, quiet = TRUE) {
         "edge",
         "vertex"
     )
-    attr (obj, "class") <- c ("SC", "sc", "osmdata_sc")
+    attr (obj, "class") <- c ("osmdata_sc", "SC", "sc")
 
     return (obj)
 }
@@ -100,6 +128,5 @@ osmdata_sc <- function (q, doc, quiet = TRUE) {
 
 getbb_sc <- function (x) {
 
-    apply (x$vertex [, 1:2], 2, range) %>%
-        bbox_to_string ()
+    bbox_to_string (apply (x$vertex [, 1:2], 2, range))
 }

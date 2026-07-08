@@ -1,6 +1,4 @@
-# CRAN notes for osmdata_0.2.5 submission
-
-The previous submission was removed from CRAN shortly after submission without any notice or consultation. The reason was because of a "pragma" warning-suppression statement in one C++ file which has been in that state throughout the entire package history. This submission removes that statement, resulting in the package now issuing around 20 compiler warnings. Absent any public reference from CRAN of which classes of warnings may or may not be acceptable, I trust these warnings will be ignored.
+# CRAN notes for osmdata_0.4.0 submission
 
 ## Test environments
 
@@ -15,7 +13,7 @@ Package also checked using `Clang++ -Weverything and local memory sanitzer with 
 
 ## revdepcheck results
 
-We checked 9 reverse dependencies (0 from CRAN + 9 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 15 reverse dependencies (2 from CRAN + 13 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
  * We saw 0 new problems
  * We failed to check 0 packages

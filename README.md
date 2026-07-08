@@ -73,8 +73,8 @@ roads <- osmdata_sf(doc = "geneva-roads.osm")
 
 ## Versioning
 
-This fork currently publishes `osmdata.mobility` version `0.2.5.005`, based on
-upstream osmdata plus the file-based XML read performance change.
+This fork currently tracks upstream osmdata `0.4.0.9000`, plus the
+file-based XML read performance change.
 
 ## License
 

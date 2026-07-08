@@ -8,7 +8,8 @@ getbb(
   place_name,
   display_name_contains = NULL,
   viewbox = NULL,
-  format_out = "matrix",
+  format_out = c("matrix", "data.frame", "string", "polygon", "sf_polygon",
+    "osm_type_id"),
   base_url = "https://nominatim.openstreetmap.org",
   featuretype = "settlement",
   limit = 10,
@@ -17,51 +18,59 @@ getbb(
 )
 }
 \arguments{
-\item{place_name}{The name of the place you're searching for}
+\item{place_name}{The name of the place you're searching for or a wikidata
+id. For Wikidata, only \code{format_out}, \code{base_url} and \code{silent} are used; all
+other parameters are ignored.}
 
 \item{display_name_contains}{Text string to match with display_name field
-returned by \url{https://wiki.openstreetmap.org/wiki/Nominatim}}
+returned by \url{https://wiki.openstreetmap.org/wiki/Nominatim}.}
 
-\item{viewbox}{The bounds in which you're searching}
+\item{viewbox}{Focuses the search on the given area defined as
+a character string \code{"x1,y1,x2,y2"} or \code{c(x1, y1, x2, y2)}. Any two corner
+points of the box are accepted as long as they make a proper box. \code{x} is
+longitude, \code{y} is latitude.}
 
 \item{format_out}{Character string indicating output format: \code{matrix}
-(default), \code{string} (see \code{\link[=bbox_to_string]{bbox_to_string()}}), \code{data.frame} (all 'hits' returned
-by Nominatim), \code{sf_polygon} (for polygons that work with the sf package),
-\code{polygon} (full polygonal bounding boxes for each match) or \code{osm_type_id} (
-string for quering inside deffined OSM areas \code{\link[=bbox_to_string]{bbox_to_string()}}).}
+(default), \code{string} (see \code{\link[=bbox_to_string]{bbox_to_string()}}),
+\code{data.frame} (all 'hits' returned by Nominatim),
+\code{sf_polygon} (for polygons that work with the sf package),
+\code{polygon} (full polygonal bounding boxes for each match) or
+\code{osm_type_id} (string for quering inside deffined OSM areas
+\code{\link[=bbox_to_string]{bbox_to_string()}}).}
 
-\item{base_url}{Base website from where data is queried}
+\item{base_url}{Base website from where data is queried.}
 
-\item{featuretype}{The type of OSM feature (settlement is default; see Note)}
+\item{featuretype}{The type of OSM feature (settlement is default; see Note).}
 
 \item{limit}{How many results should the API return?}
 
-\item{key}{The API key to use for services that require it}
+\item{key}{The API key to use for services that require it.}
 
-\item{silent}{Should the API be printed to screen? TRUE by default}
+\item{silent}{Should the API be printed to screen? \code{TRUE} by default.}
 }
 \value{
-Defaults to a matrix in the form:
-\code{
-  min   max
+For \code{format_out = "matrix"}, the default, return the bounding box:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{  min   max
 x ...   ...
 y ...   ...
-}
+}\if{html}{\out{</div>}}
 
-If \code{format_out = "polygon"}, one or more two-columns matrices of polygonal
-longitude-latitude points. Where multiple \code{place_name} occurrences are found
-within \code{nominatim}, each item of the list of coordinates may itself contain
-multiple coordinate matrices where multiple exact matches exist. If one
-exact match exists with potentially multiple polygonal boundaries (for
-example, "london uk" is an exact match, but can mean either greater London or
-the City of London), only the first is returned. See examples below for
-illustration.
+If \code{format_out = "polygon"}, a list of polygons and multipolygons with one
+item for each \code{nominatim} result. The items are named with the OSM type and
+id. Each polygon is formed by one or more two-columns matrices of polygonal
+longitude-latitude points. The first matrix represents the outer boundary and
+the next ones represent holes. See examples below for illustration.
 
-For \code{format_out = "osm_type_id"}, a character string representing an OSM object in overpass query
-language. For example: \code{"relation(id:11747082)"} represents the area of
-the Catalan Countries. If one exact match exists with potentially multiple
-polygonal boundaries, only the first relation or way is returned. A set of
-objects can also be represented for multiple results (e.g.
+If \code{format_out = "sf_polygon"}, a \code{sf} object. Each row correspond to a
+\code{place_name} within \code{nominatim} result.
+
+For \code{format_out = "osm_type_id"}, a character string representing an OSM
+object in overpass query language. For example:
+\code{"relation(id:11747082)"} represents the area of the Catalan Countries.
+If one exact match exists with potentially multiple polygonal boundaries,
+only the first relation or way is returned. A set of objects can also be
+represented for multiple results (e.g.
 \verb{relation(id:11747082,307833); way(id:22422490)}). See examples below for
 illustration. The OSM objects that can be used as
 \href{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#Map_way/relation_to_area_(map_to_area)}{areas in overpass queries}
@@ -91,23 +100,29 @@ a city is desired, better results will usually be obtained with
 \examples{
 \dontrun{
 getbb ("Salzburg")
-# select based on display_name, print query url
+# Select based on display_name, print query url
 getbb ("Hereford", display_name_contains = "United States", silent = FALSE)
 # top 3 matches as data frame
 getbb ("Hereford", format_out = "data.frame", limit = 3)
+getbb ("Hereford", format_out = "data.frame", viewbox = getbb ("England"))
 
 # Examples of polygonal boundaries
-bb <- getbb ("london uk", format_out = "polygon") # single match
-dim (bb [[1]] [[1]]) # matrix of longitude/latitude pairs
+bb <- getbb ("Milano, Italy", format_out = "polygon")
+# A polygon and a multipolygon:
+str (bb) # matrices of longitude/latitude pairs
+
 bb_sf <- getbb ("kathmandu", format_out = "sf_polygon")
+bb_sf
 # sf:::plot.sf(bb_sf) # can be plotted if sf is installed
 getbb ("london", format_out = "sf_polygon")
-getbb ("accra", format_out = "sf_polygon") # rectangular bb
 
-area <- getbb ("València", format_out = "osm_type_id")
-# select multiple areas with format_out = "osm_type_id"
+getbb ("València", format_out = "osm_type_id")
+# Select multiple areas with format_out = "osm_type_id"
 areas <- getbb ("València", format_out = "data.frame")
 bbox_to_string (areas [areas$osm_type != "node", ])
+
+# Search by wikidata id (València)
+getbb ("Q5720", format_out = "data.frame")
 
 # Using an alternative service (locationiq requires an API key)
 # add LOCATIONIQ=type_your_api_key_here to .Renviron:
@@ -121,16 +136,17 @@ if (nchar (key) == 32) {
 }
 }
 \seealso{
-Other queries: 
-\code{\link{add_osm_features}()},
-\code{\link{add_osm_feature}()},
-\code{\link{bbox_to_string}()},
-\code{\link{opq_around}()},
-\code{\link{opq_csv}()},
-\code{\link{opq_enclosing}()},
-\code{\link{opq_osm_id}()},
-\code{\link{opq_string}()},
-\code{\link{opq}()},
-\code{\link{overpass_status}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=add_osm_features]{add_osm_features()}},
+\code{\link[=bbox_to_string]{bbox_to_string()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=opq]{opq()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_csv]{opq_csv()}},
+\code{\link[=opq_enclosing]{opq_enclosing()}},
+\code{\link[=opq_osm_id]{opq_osm_id()}},
+\code{\link[=opq_string]{opq_string()}},
+\code{\link[=overpass_status]{overpass_status()}}
 }
 \concept{queries}

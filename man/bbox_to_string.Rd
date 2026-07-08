@@ -10,7 +10,7 @@ bbox_to_string(bbox)
 \item{bbox}{bounding box as character, matrix, vector or a data.frame with
 \code{osm_type} and \code{osm_id} columns.
 If character, the bbox will be found (geocoded) and extracted with
-\link{getbb}. Unnamed vectors will be sorted appropriately and must merely be
+\code{\link[=getbb]{getbb()}}. Unnamed vectors will be sorted appropriately and must merely be
 in the order (x, y, x, y).}
 }
 \value{
@@ -26,22 +26,28 @@ data.frames (e.g. \code{"relation(id:11747082,307833); way(id:22422490)"}).
 This function converts a bounding box into a string for use in web apis
 }
 \examples{
+# Note input is (lon, lat) = (x, y) but output as needed for 'Overpass' API
+# is (lat, lon) = (y, x).
+bb <- c (-0.4325512, 39.2784496, -0.2725205, 39.566609)
+bbox_to_string (bb)
+# This is equivalent to:
 \dontrun{
 bbox_to_string (getbb ("València"))
 bbox_to_string (getbb ("València", format_out = "data.frame"))
 }
 }
 \seealso{
-Other queries: 
-\code{\link{add_osm_features}()},
-\code{\link{add_osm_feature}()},
-\code{\link{getbb}()},
-\code{\link{opq_around}()},
-\code{\link{opq_csv}()},
-\code{\link{opq_enclosing}()},
-\code{\link{opq_osm_id}()},
-\code{\link{opq_string}()},
-\code{\link{opq}()},
-\code{\link{overpass_status}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=add_osm_features]{add_osm_features()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=getbb]{getbb()}},
+\code{\link[=opq]{opq()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_csv]{opq_csv()}},
+\code{\link[=opq_enclosing]{opq_enclosing()}},
+\code{\link[=opq_osm_id]{opq_osm_id()}},
+\code{\link[=opq_string]{opq_string()}},
+\code{\link[=overpass_status]{overpass_status()}}
 }
 \concept{queries}

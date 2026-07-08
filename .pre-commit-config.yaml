@@ -2,15 +2,18 @@
 # R specific hooks: https://github.com/lorenzwalthert/precommit
 repos:
 -   repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.3.2.9021
-    hooks: 
+    rev: v0.4.3.9025
+    hooks:
     -   id: style-files
-        args: [--style_pkg=spaceout, --style_fun=spaceout_style]    
+        args: [--style_pkg=spaceout, --style_fun=spaceout_style]
+        exclude: >
+          (?x)^(
+          tests/testthat/mock_.*/.*|
+          tests/testthat/_snaps/.*|
+          )$
         additional_dependencies:
         - ropensci-review-tools/spaceout
-          # -   id: roxygenize
-    # codemeta must be above use-tidy-description when both are used
-    -   id: codemeta-description-updated
+    # -   id: roxygenize
     -   id: use-tidy-description
     -   id: spell-check
         exclude: >
@@ -41,16 +44,25 @@ repos:
           (.*/|)WORDLIST|
           \.github/workflows/.*|
           data/.*|
+          tests/testthat/mock_.*/.*|
+          tests/testthat/_snaps/.*|
           )$
-          # -   id: lintr
+    # -   id: lintr
+    #     exclude: >
+    #       (?x)^(
+    #       tests/testthat/mock_.*/.*|
+    #       tests/testthat/_snaps/.*|
+    #       )$
     -   id: readme-rmd-rendered
     -   id: parsable-R
     -   id: no-browser-statement
+    -   id: no-print-statement
     -   id: no-debug-statement
     -   id: deps-in-desc
+    # -   id: pkgdown
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks: 
+    rev: v6.0.0
+    hooks:
     -   id: check-added-large-files
         args: ['--maxkb=200']
     -   id: file-contents-sorter
@@ -60,7 +72,7 @@ repos:
 -   repo: https://github.com/pre-commit-ci/pre-commit-ci-config
     rev: v1.6.1
     hooks:
-    # Only reuiqred when https://pre-commit.ci is used for config validation
+    # Only required when https://pre-commit.ci is used for config validation
     -   id: check-pre-commit-ci-config
 -   repo: local
     hooks:
@@ -71,9 +83,10 @@ repos:
         files: '\.(Rhistory|RData|Rds|rds)$'
         # `exclude: <regex>` to allow committing specific files
     -   id: description version
-        name: Version has been incremented in DESCRIPTION
+        name: Version has been incremeneted in DESCRIPTION
         entry: .hooks/description
         language: script
 
 ci:
     autoupdate_schedule: monthly
+    # skip: [pkgdown]

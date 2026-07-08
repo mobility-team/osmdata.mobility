@@ -8,7 +8,7 @@ opq_csv(q, fields, header = TRUE)
 }
 \arguments{
 \item{q}{A opq string or an object of class \code{overpass_query} constructed with
-\link{opq} or alternative opq builders (+ \link{add_osm_feature}/s).}
+\code{\link[=opq]{opq()}} or alternative opq builders (+ \code{\link[=add_osm_feature]{add_osm_feature()}}/s).}
 
 \item{fields}{a character vector with the field names.}
 
@@ -24,7 +24,7 @@ Transform an Overpass query to return the result in a csv format
 \details{
 The output format \code{csv}, ask for results in csv. See
 \href{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#CSV_output_mode}{CSV output mode}
-for details. To get the data, use \link{osmdata_data_frame}.
+for details. To get the data, use \code{\link[=osmdata_data_frame]{osmdata_data_frame()}}.
 }
 \note{
 csv queries that reach the timeout will return a 0 row data.frame
@@ -33,33 +33,34 @@ expected result.
 }
 \examples{
 \dontrun{
-q <- getbb ("Catalan Countries", format_out = "osm_type_id") \%>\%
-    opq (out = "tags center", osm_type = "relation", timeout = 100) \%>\%
-    add_osm_feature ("admin_level", "7") \%>\%
-    add_osm_feature ("boundary", "administrative") \%>\%
-    opq_csv (fields = c("name", "::type", "::id", "::lat", "::lon"))
+q <- getbb ("Catalan Countries", format_out = "osm_type_id") |>
+    opq (out = "tags center", osm_type = "relation", timeout = 100) |>
+    add_osm_feature ("admin_level", "7") |>
+    add_osm_feature ("boundary", "administrative") |>
+    opq_csv (fields = c ("name", "::type", "::id", "::lat", "::lon"))
 comarques <- osmdata_data_frame (q) # without timeout parameter, 0 rows
 
-qid<- opq_osm_id (
+qid <- opq_osm_id (
     type = "relation",
     id = c ("341530", "1809102", "1664395", "343124"),
     out = "tags"
-) \%>\%
+) |>
     opq_csv (fields = c ("name", "name:ca"))
 cities <- osmdata_data_frame (qid)
 }
 }
 \seealso{
-Other queries: 
-\code{\link{add_osm_features}()},
-\code{\link{add_osm_feature}()},
-\code{\link{bbox_to_string}()},
-\code{\link{getbb}()},
-\code{\link{opq_around}()},
-\code{\link{opq_enclosing}()},
-\code{\link{opq_osm_id}()},
-\code{\link{opq_string}()},
-\code{\link{opq}()},
-\code{\link{overpass_status}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=add_osm_features]{add_osm_features()}},
+\code{\link[=bbox_to_string]{bbox_to_string()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=getbb]{getbb()}},
+\code{\link[=opq]{opq()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_enclosing]{opq_enclosing()}},
+\code{\link[=opq_osm_id]{opq_osm_id()}},
+\code{\link[=opq_string]{opq_string()}},
+\code{\link[=overpass_status]{overpass_status()}}
 }
 \concept{queries}

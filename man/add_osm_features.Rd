@@ -28,20 +28,20 @@ opq query bbox has been set.}
 \item{value_exact}{If FALSE, \code{value} is not interpreted exactly}
 }
 \value{
-\link{opq} object
+An \link{opq} object.
 }
 \description{
-Alternative version of \link{add_osm_feature} for creating single queries
+Alternative version of \code{\link[=add_osm_feature]{add_osm_feature()}} for creating single queries
 with multiple features. Key-value matching may be controlled by using the
 filter symbols described in
 \url{https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#By_tag_.28has-kv.29}.
 }
 \section{\code{add_osm_feature} vs \code{add_osm_features}}{
 
-Features defined within an \link{add_osm_features} call are combined with a
+Features defined within an \code{\link[=add_osm_features]{add_osm_features()}} call are combined with a
 logical OR.
 
-Chained calls to either \link{add_osm_feature} or \code{add_osm_features()} combines
+Chained calls to either \code{add_osm_feature()} or \code{\link[=add_osm_features]{add_osm_features()}} combines
 features from these calls in a logical AND; this is analagous to chaining
 \code{dplyr::filter()} on a data frame.
 
@@ -51,26 +51,33 @@ features from these calls in a logical AND; this is analagous to chaining
 
 \examples{
 \dontrun{
-q <- opq ("portsmouth usa") \%>\%
+q <- opq ("portsmouth usa") |>
     add_osm_features (features = list (
         "amenity" = "restaurant",
         "amenity" = "pub"
     ))
 
-q <- opq ("portsmouth usa") \%>\%
+q <- opq ("portsmouth usa") |>
     add_osm_features (features = c (
         "\"amenity\"=\"restaurant\"",
         "\"amenity\"=\"pub\""
     ))
+cat (opq_string (q))
 # This extracts in a single query the same result as the following:
-q1 <- opq ("portsmouth usa") \%>\%
+q1 <- opq ("portsmouth usa") |>
     add_osm_feature (
         key = "amenity",
         value = "restaurant"
     )
-q2 <- opq ("portsmouth usa") \%>\%
+q2 <- opq ("portsmouth usa") |>
     add_osm_feature (key = "amenity", value = "pub")
 c (osmdata_sf (q1), osmdata_sf (q2)) # all restaurants OR pubs
+
+# Get objects with keys (`natural` OR `waterway`) AND `name`
+q_keys <- opq ("Badia del Vallès", osm_types = "nwr", out = "tags") |>
+    add_osm_features (features = list (natural = NULL, waterway = NULL)) |>
+    add_osm_feature (key = "name")
+cat (opq_string (q_keys))
 }
 }
 \references{
@@ -79,16 +86,17 @@ c (osmdata_sf (q1), osmdata_sf (q2)) # all restaurants OR pubs
 \seealso{
 \link{add_osm_feature}
 
-Other queries: 
-\code{\link{add_osm_feature}()},
-\code{\link{bbox_to_string}()},
-\code{\link{getbb}()},
-\code{\link{opq_around}()},
-\code{\link{opq_csv}()},
-\code{\link{opq_enclosing}()},
-\code{\link{opq_osm_id}()},
-\code{\link{opq_string}()},
-\code{\link{opq}()},
-\code{\link{overpass_status}()}
+Other queries:
+\code{\link[=add_osm_feature]{add_osm_feature()}},
+\code{\link[=bbox_to_string]{bbox_to_string()}},
+\code{\link[=filter_osm_user]{filter_osm_user()}},
+\code{\link[=getbb]{getbb()}},
+\code{\link[=opq]{opq()}},
+\code{\link[=opq_around]{opq_around()}},
+\code{\link[=opq_csv]{opq_csv()}},
+\code{\link[=opq_enclosing]{opq_enclosing()}},
+\code{\link[=opq_osm_id]{opq_osm_id()}},
+\code{\link[=opq_string]{opq_string()}},
+\code{\link[=overpass_status]{overpass_status()}}
 }
 \concept{queries}

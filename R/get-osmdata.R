@@ -1,8 +1,10 @@
+timestamp_fmt_iso8601 <- "%Y-%m-%dT%H:%M:%SZ" # ISO 8601. Z indicates tz = "UTC"
+
 #' Get timestamp from system or optional OSM XML document
 #'
 #' @param doc OSM XML document. If missing, `Sys.time()` is used.
 #'
-#' @return An R timestamp object
+#' @return A POSIXct timestamp
 #'
 #' @note This defines the timestamp format for \pkg{osmdata} objects, which
 #' includes months as text to ensure umambiguous timestamps
@@ -13,7 +15,10 @@ get_timestamp <- function (doc) {
     if (!missing (doc)) {
         tstmp <- xml2::xml_text (xml2::xml_find_all (doc, "//meta/@osm_base"))
         if (length (tstmp) > 0) {
-            tstmp <- as.POSIXct (tstmp, format = "%Y-%m-%dT%H:%M:%SZ")
+            tstmp <- as.POSIXct (
+                tstmp,
+                format = timestamp_fmt_iso8601, tz = "UTC"
+            )
         }
     } else {
         tstmp <- Sys.time ()
@@ -23,13 +28,7 @@ get_timestamp <- function (doc) {
         tstmp <- Sys.time ()
     }
 
-    wday_t <- lubridate::wday (tstmp, label = TRUE)
-    wday <- lubridate::wday (tstmp, label = FALSE)
-    mon <- lubridate::month (tstmp, label = TRUE)
-    year <- lubridate::year (tstmp)
-
-    hms <- strsplit (as.character (tstmp), " ") [[1]] [2]
-    paste ("[", wday_t, wday, mon, year, hms, "]")
+    tstmp
 }
 
 
@@ -63,20 +62,20 @@ get_overpass_version <- function (doc) {
 #' implemented for osmdata_* functions except for osmdata_xml (no out:csv) and
 #' osmdata_data_frame.
 #'
-#' @param obj Initial \link{osmdata} object
+#' @param obj Initial [osmdata] object
 #'
 #' @return Nothing. Throw errors or warnings for not implemented queries.
 #'
 #' @noRd
-check_not_implemented_queries <- function (obj) {
+check_not_implemented_queries <- function (obj, meta = FALSE) {
     if (!is.null (obj$overpass_call)) {
 
         if (grepl ("; out (tags|ids)( center)*;$", obj$overpass_call)) {
             stop (
                 "Queries returning no geometries (out tags/ids) not accepted. ",
                 'Use queries with `out="body"` or `out="skel"` instead. ',
-                "Alternatively, you can retrieve the results with osmdata_xml ",
-                "or osmdata_data_frame.",
+                "Alternatively, you can retrieve the results with osmdata_xml() ",
+                "or osmdata_data_frame().",
                 call. = FALSE
             )
         }
@@ -84,21 +83,21 @@ check_not_implemented_queries <- function (obj) {
         if (grepl ("\\[adiff:", obj$overpass_call)) {
             stop (
                 "adiff queries not yet implemented. Alternatively, you can ",
-                "retrieve the results with osmdata_xml or ",
-                "osmdata_data_frame.",
+                "retrieve the results with osmdata_xml() or ",
+                "osmdata_data_frame().",
                 call. = FALSE
             )
         }
 
         if (grepl ("\\[out:csv", obj$overpass_call)) {
-            stop ("out:csv queries only work with osmdata_data_frame.")
+            stop ("out:csv queries only work with osmdata_data_frame().")
         }
 
-        if (grepl ("out meta;$", obj$overpass_call)) {
+        if (!meta & grepl ("out meta;$", obj$overpass_call)) {
             warning (
                 "`out meta` queries not yet implemented. Metadata fields will ",
                 "be missing. Alternatively, you can retrieve the results with ",
-                "osmdata_xml or osmdata_data_frame.",
+                "osmdata_xml(), osmdata_sf(), or osmdata_data_frame().",
                 call. = FALSE
             )
         }
@@ -111,7 +110,7 @@ fix_duplicated_columns <- function (x) {
     dup <- duplicated (x)
     i <- 1
     while (any (dup)) {
-        x[dup] <- paste0 (x[dup], ".", i)
+        x [dup] <- paste0 (x [dup], ".", i)
         i <- i + 1
         dup <- duplicated (x)
     }
@@ -128,7 +127,7 @@ fix_columns_list <- function (l) {
             "Feature keys clash with id or metadata columns and will be ",
             "renamed by appending `.n`:\n\t",
             paste (
-                unique (setdiff (unlist (cols_no_dup), unlist(cols))),
+                unique (setdiff (unlist (cols_no_dup), unlist (cols))),
                 collapse = ", "
             )
         )
@@ -145,10 +144,10 @@ fix_columns_list <- function (l) {
 #' fill osmdata object with overpass data and metadata, and return character
 #' version of OSM xml document
 #'
-#' @param obj Initial \link{osmdata} object
+#' @param obj Initial [osmdata] object
 #' @param doc Document contain XML-formatted version of OSM data
-#' @inheritParams osmdata_sp
-#' @return List of an \link{osmdata} object (`obj`), and XML
+#' @inheritParams osmdata_sf
+#' @return List of an [osmdata] object (`obj`), and XML
 #'      document (`doc`)
 #' @noRd
 fill_overpass_data <- function (obj, doc, quiet = TRUE, encoding = "UTF-8") {
@@ -216,7 +215,7 @@ get_metadata <- function (obj, doc) {
             meta$datetime_from <- x [2]
             meta$datetime_to <- x [4]
             if (!is_datetime (meta$datetime_to) &
-                inherits(doc, "xml_document")) { # adiff opq without datetime2
+                inherits (doc, "xml_document")) { # adiff opq without datetime2
                 meta$datetime_to <- xml2::xml_text (xml2::xml_find_all (
                     doc,
                     "//meta/@osm_base"
@@ -243,8 +242,8 @@ get_metadata <- function (obj, doc) {
 
             if (grepl ("adiff", q$prefix) ||
                 (
-                    inherits(doc, "xml_document") &&
-                    "action" %in% xml2::xml_name (xml2::xml_children (doc))
+                    inherits (doc, "xml_document") &&
+                        "action" %in% xml2::xml_name (xml2::xml_children (doc))
                 )
             ) {
                 meta$query_type <- "adiff"
@@ -256,8 +255,8 @@ get_metadata <- function (obj, doc) {
 
             if (grepl ("adiff", q$prefix) ||
                 (
-                    inherits(doc, "xml_document") &&
-                    "action" %in% xml2::xml_name (xml2::xml_children (doc))
+                    inherits (doc, "xml_document") &&
+                        "action" %in% xml2::xml_name (xml2::xml_children (doc))
                 )
             ) {
                 meta$datetime_from <- attr (q, "datetime")
@@ -273,7 +272,7 @@ get_metadata <- function (obj, doc) {
 
         }
 
-    } else if (inherits(doc, "xml_document")) { # is.null (q)
+    } else if (inherits (doc, "xml_document")) { # is.null (q)
 
         if ("action" %in% xml2::xml_name (xml2::xml_children (doc))) {
             osm_actions <- xml2::xml_find_all (doc, ".//action")
@@ -323,6 +322,12 @@ get_meta_from_cpp_output <- function (res, what = "points") {
     this <- this [, which (has_data), drop = FALSE]
     if (ncol (this) > 0L) {
         colnames (this) <- paste0 ("osm", colnames (this))
+
+        this [, "osm_user"] <- enc2utf8 (this [, "osm_user"])
+        this [, "osm_timestamp"] <- as.POSIXct (
+            this [, "osm_timestamp"],
+            format = timestamp_fmt_iso8601, tz = "UTC"
+        )
     }
 
     return (as.data.frame (this))
@@ -346,4 +351,20 @@ get_center_from_cpp_output <- function (res, what = "points") {
     }
 
     return (as.data.frame (this))
+}
+
+
+#' Set encoding to UTF-8
+#'
+#' @param x a data.frame or a list.
+#'
+#' @return `x` with all the columns or items of type character with UTF-8 encoding set.
+#' @noRd
+setenc_utf8 <- function (x) {
+    char_cols <- which (vapply (x, is.character, FUN.VALUE = logical (1)))
+    x [char_cols] <- lapply (x [char_cols], function (y) {
+        enc2utf8 (y)
+    })
+
+    return (x)
 }
