@@ -84,7 +84,10 @@ osmdata_data_frame <- function (q,
         message ("converting OSM data to a data.frame")
     }
 
-    if (is.character (doc)) {
+    is_xml_text <- is.character (doc) &&
+        grepl ("^\\s*<", doc)
+
+    if (is.character (doc) && !is_xml_text) {
         header <- is.null (obj$overpass_call) ||
             !grepl ("\\[out:csv\\(.+; false\\)\\]", obj$overpass_call)
         # Values containing `,` | `"` get quoted with `"`. `"` in values -> `""`
@@ -105,6 +108,9 @@ osmdata_data_frame <- function (q,
         if (is.null (datetime_from)) datetime_from <- "old"
         datetime_to <- obj$meta$datetime_to
         if (is.null (datetime_to)) datetime_to <- "new"
+        if (is_xml_text) {
+            doc <- xml2::read_xml (doc)
+        }
         df <- xml_adiff_to_df (doc,
             datetime_from = datetime_from, datetime_to = datetime_to,
             stringsAsFactors = stringsAsFactors
